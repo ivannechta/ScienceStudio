@@ -9,7 +9,8 @@ char Filename[] = "k.txt";
 int main()
 {
     TCore Core;     
-    
+    Core.Settings->ParceSettings();
+    //Core.Settings->ModuleFunction[0]();
     SHOW("Enter command\n");
     Context.FileName=Filename;
     while (isRunning) {

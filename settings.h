@@ -1,0 +1,38 @@
+#pragma once
+#include"header.h"
+
+const uint16_t Settings_Max_Modules=100;
+typedef int (*ModuleFuncType)();
+struct TSettings_Record{
+	char* AliasName;
+	char* Namespace;
+	char* ModuleFileName;
+	char* FunctionName;
+};
+class TSettings
+{
+private:
+	uint16_t SettingsSize;
+	struct TSettings_Record** SettingsRecord;
+public:
+	ModuleFuncType *ModuleFunction;
+public:
+	void ParceSettings();
+	int LoadFunction(TSettings_Record* _rec);
+	int Search(TSettings_Record* _rec);
+	bool CmpAlias(TSettings_Record* _a, TSettings_Record* _b);
+
+public:
+	TSettings() {
+		SettingsRecord = new TSettings_Record*[Settings_Max_Modules];
+		ModuleFunction = new ModuleFuncType[Settings_Max_Modules];
+		for (uint16_t i = 0; i < Settings_Max_Modules; i++) {
+			ModuleFunction[i] = NULL;
+		}
+		SettingsSize = 0;
+	}
+	~TSettings() {
+		delete[] SettingsRecord;
+		delete ModuleFunction;
+	}
+};
