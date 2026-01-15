@@ -39,4 +39,9 @@ void CallEXEFunction() {
         // ...
     }
 }
+======================= VTY
+ HANDLE pipe = CreateFile(TEXT("\\\\.\\pipe\\ScienceStudio"), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);     
+    char message[] = "TEST namedPipe";
+    DWORD numWritten;
+    WriteFile(pipe, message, (DWORD)strlen(message), &numWritten, NULL);
 */

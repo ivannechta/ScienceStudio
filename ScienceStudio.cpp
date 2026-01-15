@@ -4,21 +4,19 @@
 #include <windows.h>
 
 bool isRunning = true;
-char PROMPT[] = "\n>";
-char Filename[] = "k.txt";
+
 int main()
 {
-    TCore Core;     
+    TContext Context;
+    TCore Core(&Context);
+    HANDLE HandleConsoleThread = CreateThread(NULL, 0, Console_Thread, &Core, 0, NULL);
+    Sleep(100); // Wait until pipe created
     Core.Settings->ParceSettings();
     //Core.Settings->ModuleFunction[0]();
-    SHOW("Enter command\n");
-    Context.FileName=Filename;
+    SHOW("Enter commands\n");
     while (isRunning) {
-        printf(PROMPT);
+        Core.Prompt();
         scanf_s("%s", Core.ConsoleInput, ConsoleCommandSize);
         Core.Execute();
-
-        char b[] = "12342";
-        Core.ConsoleOutput(b,5);
-    }    
+    }
 }

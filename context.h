@@ -7,4 +7,8 @@ public:
 	void* Vars; // Variable list with values, search methods
 	void* Arguments; //console arguments for parsing and function call
 	void* Settings; // list of loaded modules and other settins
+	TContext() {
+		FileName = NULL;
+		GL_surface = Vars = Arguments = Settings = NULL;
+	}
 };
