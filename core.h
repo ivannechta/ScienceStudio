@@ -3,13 +3,15 @@
 #include "context.h"
 #include "settings.h"
 #include <windows.h>
+#include "parcecmd.h"
 const uint16_t ConsoleCommandSize = 1000;
 const uint16_t OUTPUT_TEXT_MAX = 500; // Console do not shows long text
 DWORD WINAPI Console_Thread(void* _core);
-
+class TParceCMD;
 class TCore {
 private:
 	TContext *Context;
+	TParceCmd* CMD;
 	
 public:	
 	TSettings* Settings;
@@ -23,9 +25,11 @@ public:
 		Context = _ctx;
 		ConsoleInput = new char[ConsoleCommandSize + 1];
 		Settings = new TSettings();
+		CMD = new TParceCmd(this);
 	}
 	~TCore() {
 		delete ConsoleInput;
 		delete Settings;
+		delete CMD;
 	}
 };

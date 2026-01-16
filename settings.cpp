@@ -43,6 +43,7 @@ int TSettings::LoadFunction(TSettings_Record* _rec)
         return -1;
     }
     SettingsRecord[SettingsSize++] = _rec;
+    return 0;
 }
 
 bool TSettings::CmpAlias(TSettings_Record* _a, TSettings_Record* _b) {
@@ -53,7 +54,7 @@ bool TSettings::CmpAlias(TSettings_Record* _a, TSettings_Record* _b) {
 
 int TSettings::Search(TSettings_Record* _rec)
 {
-    for (int16_t i = 0; i < Settings_Max_Modules; i++) {
+    for (int16_t i = 0; i < SettingsSize; i++) {
         if (CmpAlias(_rec, SettingsRecord[i])) {
             return i;
         }

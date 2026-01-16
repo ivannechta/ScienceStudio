@@ -36,6 +36,7 @@ void TCore::Execute() {
 	{
 		exit(0);
 	}
+	CMD->Parce();
 }
 
 void TCore::ConsoleOutput(char* _buffer, uint32_t _size)
