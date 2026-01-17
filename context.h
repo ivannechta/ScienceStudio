@@ -1,6 +1,14 @@
 #pragma once
+#include <stdlib.h>
+#include "header.h"
+const uint16_t MAX_PARAMS = 256;
 /*There are just Fields with simple types, because this header will be included in modules*/
+struct TArguments {
+	int argc;
+	char** argv;
+};
 class TContext {
+	void InitArgs();
 public:
 	void* GL_surface; //for plot and 3D modeling
 	char* FileName; //result output file or console if Filename is NULL
@@ -9,6 +17,10 @@ public:
 	void* Settings; // list of loaded modules and other settins
 	TContext() {
 		FileName = NULL;
-		GL_surface = Vars = Arguments = Settings = NULL;
+		GL_surface = Vars = Settings = NULL;
+		Arguments = (void*)new TArguments;
+		InitArgs();
 	}
+	void AddArgs(char * _param);
+	void ClearArgs();
 };

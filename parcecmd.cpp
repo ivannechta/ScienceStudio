@@ -1,5 +1,6 @@
 #include "parcecmd.h"
 #include "core.h"
+#include "context.h"
 bool TParceCmd::isNameChar(unsigned char ch) {
 	if (isDigit(ch)) return true;
 	if (((ch >= 'a') && (ch <= 'z')) ||
@@ -76,11 +77,31 @@ bool TParceCmd::ParceFunctionCall(char* text, uint16_t i) {
 	rec.AliasName = Alias;
 	j = Core->Settings->Search(&rec);
 	if (j != -1) {
+		ParceParams(Cons, j);
 		Core->Settings->ModuleFunction[0]();
 	}
 	else {
 		char _message[] = "Invalid Funcation Name. Not found\n";
 		Core->ConsoleOutput(_message, (uint32_t)strlen(_message));
+	}
+	return true;
+}
+bool TParceCmd::ParceParams(char* text, uint16_t i)
+{
+	char *str = &text[i];
+	char* token;
+	char* context = NULL; // Context pointer for state
+	size_t max_len = sizeof(str); // For the first call
+	char delim[] = "(, )";
+
+	// First call: tokenize the string by comma
+
+	token = strtok_s(str, delim, &context); // Note: context and max_len often passed by reference in implementations
+	Core->Context_lnk->ClearArgs();
+	while (token != NULL) {
+		printf("%s\n", token);
+		Core->Context_lnk->AddArgs(token);
+		token = strtok_s(NULL, delim, &context);
 	}
 	return true;
 }

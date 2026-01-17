@@ -43,8 +43,8 @@ void TCore::ConsoleOutput(char* _buffer, uint32_t _size)
 {
 	FILE* f;
 	errno_t err;
-	if (Context->FileName) {
-		err = fopen_s(&f, Context->FileName, "ab");
+	if (Context_lnk->FileName) {
+		err = fopen_s(&f, Context_lnk->FileName, "ab");
 		if (err != 0) {
 			SHOW("Error. File not found.\n");
 			return;

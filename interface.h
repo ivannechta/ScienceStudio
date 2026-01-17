@@ -7,6 +7,8 @@ extern TContext Context;
 for backward compatibility, if we extend Context old modules becomes failure
 */
 extern "C" __declspec(dllexport) void* GetParam(char* _paramName) {
+	printf("Request GetParam");
+	printf("('%s')\n", _paramName);
 	if (!strcmp(_paramName, "Arguments")) return (void*)Context.Arguments;
 	if (!strcmp(_paramName, "FileName")) return (void*)Context.FileName;
 	if (!strcmp(_paramName, "Vars")) return Context.Vars;

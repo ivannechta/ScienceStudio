@@ -12,6 +12,7 @@ public:
 	int PassNameSpace(char* text, uint16_t i);
 	int PassFuncName(char* text, uint16_t i);
 	bool ParceFunctionCall(char* text, uint16_t i);
+	bool ParceParams(char* text, uint16_t i);
 	void Parce();
 
 	TParceCmd(TCore* _core) {

@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="context.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="parcecmd.cpp" />
     <ClCompile Include="ScienceStudio.cpp" />
