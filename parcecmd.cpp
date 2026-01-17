@@ -10,8 +10,8 @@ bool TParceCmd::isNameChar(unsigned char ch) {
 bool TParceCmd::isDigit(char ch) {
 	return ((ch >= '0') && (ch <= '9'));
 }
-int TParceCmd::PassNameSpace(char* text, uint16_t i) {
-	uint16_t lastPoint = -1;
+int TParceCmd::PassNameSpace(char* text, int i) {
+	int lastPoint = -1;
 	int j;
 	while (text[i] != '(')
 	{
@@ -21,18 +21,18 @@ int TParceCmd::PassNameSpace(char* text, uint16_t i) {
 			continue;
 		}
 		j = PassName(text, i);
-		if (i == j) return -1; //Cannot read further
-		if (j == -1) return -1;
+		if (i >= j) return -1; //Cannot read further
+		if (j < 0) return -1;
 
 		i = j + 1;
 	}
 	return lastPoint - 1;
 }
-int TParceCmd::PassFuncName(char* text, uint16_t i)
+int TParceCmd::PassFuncName(char* text, int i)
 {
 	return 0;
 }
-int TParceCmd::PassName(char* text, uint16_t i)
+int TParceCmd::PassName(char* text, int i)
 {	
 	if ((text[i] != 0) && isDigit(text[i])) {
 		return -1;
@@ -46,14 +46,14 @@ int TParceCmd::PassName(char* text, uint16_t i)
 	}
 	return i - 1;
 }
-bool TParceCmd::ParceFunctionCall(char* text, uint16_t i) {
+bool TParceCmd::ParceFunctionCall(char* text, int i) {
 	char* Cons = Core->ConsoleInput;
 	int j;
 	char* Namespace = new char[256];
 	char* Alias = new char[256];
 	
 	j = PassNameSpace(Cons, i);
-	if (j == -1) {
+	if (j < 0) {
 		char _message[] = "Invalid expression in NameSpace\n";
 		Core->ConsoleOutput(_message, (uint32_t)strlen(_message));
 		return false;
@@ -63,7 +63,7 @@ bool TParceCmd::ParceFunctionCall(char* text, uint16_t i) {
 	printf("Recognized namespace %s\n", Namespace);
 
 	j = PassName(Cons, i + 2);
-	if (j == -1) {
+	if (j < 0) {
 		char _message[] = "Invalid expression in Function Name\n";
 		Core->ConsoleOutput(_message, (uint32_t)strlen(_message));
 		return false;
@@ -77,7 +77,7 @@ bool TParceCmd::ParceFunctionCall(char* text, uint16_t i) {
 	rec.AliasName = Alias;
 	j = Core->Settings->Search(&rec);
 	if (j != -1) {
-		ParceParams(Cons, j);
+		ParceParams(Cons, i + 1);
 		Core->Settings->ModuleFunction[0]();
 	}
 	else {
@@ -86,9 +86,9 @@ bool TParceCmd::ParceFunctionCall(char* text, uint16_t i) {
 	}
 	return true;
 }
-bool TParceCmd::ParceParams(char* text, uint16_t i)
+bool TParceCmd::ParceParams(char* text, int i)
 {
-	char *str = &text[i];
+	char *str = &text[i];	
 	char* token;
 	char* context = NULL; // Context pointer for state
 	size_t max_len = sizeof(str); // For the first call
@@ -99,7 +99,7 @@ bool TParceCmd::ParceParams(char* text, uint16_t i)
 	token = strtok_s(str, delim, &context); // Note: context and max_len often passed by reference in implementations
 	Core->Context_lnk->ClearArgs();
 	while (token != NULL) {
-		printf("%s\n", token);
+		printf("ParcedParams->%s\n", token);
 		Core->Context_lnk->AddArgs(token);
 		token = strtok_s(NULL, delim, &context);
 	}
