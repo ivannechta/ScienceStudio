@@ -140,7 +140,6 @@
     <ClInclude Include="header.h" />
     <ClInclude Include="interface.h" />
     <ClInclude Include="parcecmd.h" />
-    <ClInclude Include="ScienceStudio.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="grammar.h" />
   </ItemGroup>

@@ -34,9 +34,9 @@ void TGrammar::ShowStack(TStack* _stack)
 int TGrammar::Priority(char operation)
 {
     switch (operation) {
-    //case '(':
-    //case '[':
-        //return 6;
+    case '(':
+    case ')':
+        return 6;
     //case '^':
 //        return 5;
     case '*':
@@ -80,8 +80,12 @@ int TGrammar::UReadFloat(char* _expression, int _pos)
         i++;
 		i = UReadInt(_expression, i);
         if (i == -1) return -1;
+        return i;
     }
-    return i;
+    else {
+		return i - 1;
+    }
+    
 }
 int TGrammar::ReadFloat(char* _expression, int _pos)
 {   
@@ -168,9 +172,34 @@ char* TGrammar::PolizArithm(char* _expression)
                 
                 push(&Stack_tmp, znak);
             } else {
-                while ((Stack_tmp)&&(Priority(znak[0]) <= Priority(Stack_tmp->data[0]))) {
-                    stk_znak = pop(&Stack_tmp);
-                    push(&Stack, stk_znak);
+                if (znak[0] == '(') {
+                    push(&Stack_tmp, znak);
+                    i++;
+                    continue;
+                }
+
+                if (znak[0] == ')') {
+                    while ((Stack_tmp) &&
+                        (Stack_tmp->data[0]!='('))
+                    {
+                        stk_znak = pop(&Stack_tmp);
+                        if (stk_znak) {
+                            push(&Stack, stk_znak);
+                        }
+                    }
+                    pop(&Stack_tmp); // pop '('
+                    i++;
+                    continue;
+                }
+                else {
+                    while ((Stack_tmp) &&
+                        (Priority(znak[0]) <= Priority(Stack_tmp->data[0])) &&
+                        (Stack_tmp->data[0] != '(')
+                        )
+                    {
+                        stk_znak = pop(&Stack_tmp);
+                        push(&Stack, stk_znak);
+                    }
                 }
                 push(&Stack_tmp, znak);
             }
