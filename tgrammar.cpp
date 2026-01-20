@@ -45,8 +45,10 @@ int TGrammar::Priority(char operation)
     case '+':
     case '-':
         return 3;
-//    case '=':
-//        return 2;
+    case ',':
+        return 2;
+    //case '=':
+        //return 1;
 
     default:
             return 0;
@@ -127,7 +129,7 @@ int TGrammar::ReadName(char* _expression, int _pos)
 
     return i - 1;
 }
-char* TGrammar::GetNewStr(char* _expression, int _start, int _end) 
+char* TGrammar::GetNewStr(char* _expression, int _start, int _end)
 {
     char* str = new char[_end - _start + 2];
 	str[_end - _start + 1] = 0;
@@ -157,7 +159,12 @@ char* TGrammar::PolizArithm(char* _expression)
         {
             StartLexemma = false;
             str = GetNewStr(_expression, i, j);
-            push(&Stack, str);
+            if (strcmp(str, "func") == 0) { //Fix checking function by VAR/func search
+                push(&Stack_tmp, str);
+            }
+            else {
+                push(&Stack, str);
+            }
 			i = j + 1;
             continue;
         }
@@ -178,7 +185,9 @@ char* TGrammar::PolizArithm(char* _expression)
                     continue;
                 }
 
-                if (znak[0] == ')') {
+                if ((znak[0] == ')') ||
+                    (znak[0] == ',')) // function delimiter
+                {
                     while ((Stack_tmp) &&
                         (Stack_tmp->data[0]!='('))
                     {
@@ -187,11 +196,18 @@ char* TGrammar::PolizArithm(char* _expression)
                             push(&Stack, stk_znak);
                         }
                     }
-                    pop(&Stack_tmp); // pop '('
+                    if (znak[0] != ',') {
+                        pop(&Stack_tmp); // pop '('
+                    }
+                    if (strcmp(Stack_tmp->data, "func") == 0) { // Fix checking function by VAR/func search
+                        stk_znak = pop(&Stack_tmp); // pop function name
+                        if (stk_znak) {
+                            push(&Stack, stk_znak);
+                        }
+                    }
                     i++;
                     continue;
-                }
-                else {
+                } else {
                     while ((Stack_tmp) &&
                         (Priority(znak[0]) <= Priority(Stack_tmp->data[0])) &&
                         (Stack_tmp->data[0] != '(')
