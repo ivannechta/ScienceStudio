@@ -132,7 +132,9 @@
     <ClCompile Include="parcecmd.cpp" />
     <ClCompile Include="ScienceStudio.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="tablevars.cpp" />
     <ClCompile Include="tgrammar.cpp" />
+    <ClCompile Include="vars.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="context.h" />
@@ -142,6 +144,8 @@
     <ClInclude Include="parcecmd.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="grammar.h" />
+    <ClInclude Include="tablevars.h" />
+    <ClInclude Include="vars.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

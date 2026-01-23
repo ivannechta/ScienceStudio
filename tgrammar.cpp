@@ -47,8 +47,8 @@ int TGrammar::Priority(char operation)
         return 3;
     case ',':
         return 2;
-    //case '=':
-        //return 1;
+    case '=':
+        return 1;
 
     default:
             return 0;
@@ -138,7 +138,7 @@ char* TGrammar::GetNewStr(char* _expression, int _start, int _end)
     }
     return str;
 }
-char* TGrammar::PolizArithm(char* _expression)
+void TGrammar::PolizArithm(char* _expression)
 {
 	int i = 0;
     int j = 0;
@@ -147,13 +147,12 @@ char* TGrammar::PolizArithm(char* _expression)
     char* str; // part of the expression with name or float
     bool StartLexemma = true; // unary minus possible, but after name just arithmetic minus appears
     while (i < size) {
-        printf("Stack \n");
+        /*printf("Stack \n");
         ShowStack(Stack);
         printf("\n");
         ShowStack(Stack_tmp);
-        printf("\n-------\n");
-
-        if (((j = ReadName(_expression, i)) != -1) ||
+        printf("\n-------\n");*/
+        if (((j = ReadName(_expression, i)) != -1) ||   // is it Name or const?
             (StartLexemma && (j = ReadFloat(_expression, i)) != -1)||
             (!StartLexemma && (j = UReadFloat(_expression, i)) != -1))
         {
@@ -233,5 +232,83 @@ char* TGrammar::PolizArithm(char* _expression)
 
 	ShowStack(Stack);
 
-	return nullptr;
+	//return nullptr;
+    //return Stack
+}
+void TGrammar::CalcExpr(char* _expression) {
+    PolizArithm(_expression);
+    TExpressionResult res=CalcOneStep(Stack);
+    printf("Result = %.2f\n",res.Value);
+}
+float TGrammar::ApplySign(float _a,char znak ,float _b) {
+    switch (znak)
+    {
+    case '+': return _a + _b;
+    case '-': return _a - _b;
+    case '*': return _a * _b;
+    case '/': return _a / _b;    
+    default:
+        printf("Error in ApplyZnak\n");
+        return 0;
+    }
+}
+
+void TGrammar::CreateScalarVar(TStack* stk, float _value) {
+    float* a = new float;
+    int* Tensor_a = new int[1]; Tensor_a[0] = 1;
+    *a = _value;
+    TVar* var_a = new TVar(stk->data, &a, sizeof(a));
+    var_a->Tensor = Tensor_a;	var_a->TensorSize = 1;
+    var_a->VarType = EVAR_TYPE_FLOAT;
+    var_a->Value = a;
+    TableVars->Add(var_a);
+}
+
+TExpressionResult TGrammar::CalcOneStep(TStack* stk )
+{
+	TExpressionResult res = { 0,NULL }, res_a, res_b;
+    float a, b;
+    if (!stk) { 
+        printf("Expression execution failed\n");
+        return res;
+    }
+    char znak = stk->data[0];
+    if (Priority(znak) != 0) { //znak
+        res_a = CalcOneStep(stk->next);
+        if (znak == '=') { 
+            CreateScalarVar(res_a.stk, res_a.Value);
+            res.Value = res_a.Value;
+            res.stk = res_a.stk;
+            return res;
+        }
+        res_b = CalcOneStep(res_a.stk);
+        //printf("%.2f %c %.2f\n", res_a.Value, znak, res_b.Value);
+        res.Value = ApplySign(res_a.Value, znak, res_b.Value);
+        res.stk = res_b.stk;
+        return res;
+    } else { // it is not a sign, but a Name (var or func)
+        TVar* var; float* var_tmp;
+		if (ReadName(stk->data, 0) != -1) {
+			if ((var = TableVars->Search(stk->data)) != NULL) {
+                if (var->VarType == EVAR_TYPE_FLOAT) {
+                    var_tmp = (float*)(var->Value);
+                    res.Value = *var_tmp;
+                    res.stk = stk->next;
+                    return res;
+                }
+                else {
+                    // TODO
+                    printf("Function call\n");
+                }
+            }
+
+		}
+		else if ((ReadFloat(stk->data, 0) != -1) ||
+                (ReadFloat(stk->data, 0) != -1))
+        {
+            res.Value = atof(stk->data);
+            res.stk = stk->next;
+            return res;
+		}
+    }
 }

@@ -2,15 +2,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "tablevars.h"
 
 struct TStack {
 	char* data;
 	struct TStack* next;
 };
+struct TExpressionResult {
+	float Value;
+	TStack* stk;
+};
 class TGrammar
 {
 private:
 	//struct TStack* Stack, *Stack_tmp;
+	struct TTableVars* TableVars;
+	struct TExpressionResult ExpressionResult;
 
 public:
 	//TODO: Unary minus before name
@@ -30,10 +37,15 @@ public:
 	bool isNameChar(unsigned char ch);
 	bool isDigit(char ch);
 
-	char* PolizArithm(char* _expression);
+	void PolizArithm(char* _expression);
+	void CalcExpr(char* _expression);
+	float ApplySign(float _a, char znak, float _b);
+	void CreateScalarVar(TStack* stk, float _value);
+	TExpressionResult CalcOneStep(TStack* stk);
 
-	TGrammar() {
+	TGrammar(struct TTableVars* _table) {
 		Stack = Stack_tmp = NULL;
+		ExpressionResult = { 0, NULL };
+		TableVars = _table;
 	}
 };
-
