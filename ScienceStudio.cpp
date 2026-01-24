@@ -10,21 +10,24 @@ bool isRunning = true;
 
 
 int main()
-{
-	TTableVars TableVars;
-	TGrammar g(&TableVars);
-	g.CalcExpr((char*)"a=2");
-	g.CalcExpr((char*)"b=3+a*5");
-	TableVars.ShowTable();
-	return 0;
-	/*TCore Core;
+{	
+	TCore Core;
 	HANDLE HandleConsoleThread = CreateThread(NULL, 0, Console_Thread, &Core, 0, NULL);
 	Sleep(100); // Wait until pipe created
 	Core.Settings->ParceSettings();
+
+	
+	TGrammar g(Core.Table);
+	g.CalcExpr((char*)"a=2");
+	g.CalcExpr((char*)"b=3+a*5");
+	Core.Table->ShowTable();
+	return 0;
+
+
 	SHOW("Enter commands\n");
 	while (isRunning) {
 		Core.Prompt();
 		gets_s(Core.ConsoleInput, ConsoleCommandSize);
 		Core.Execute();
-	}*/
+	}
 }

@@ -12,26 +12,18 @@ class TVar
 public:
 	void* Value;
 	char* Name;
+	char* Other; //namespace of function if need
 	enum EVAR_TYPE VarType;
 	int* Tensor;
 	int TensorSize;
+	void* CloneVar(void* _addr, int _size);
 	//void SetValue(void* _value, int* _dimen);
 	void* GetValue(int* _dimen);
 	//void GetScalarValue();
 
-	TVar(char* _name, void* _value, uint32_t _ByteSize) {
-		//int _size = strlen(_name);
-		Name = new char[strlen(_name) + 1];
-		memcpy(Name, _name, strlen(_name) + 1);
-
-		//Value = _value;
-		Value = malloc(_ByteSize);
-		if (Value && _value) {
-			memcpy(Value, _value, _ByteSize);
-			float* f = (float*)Value;			
-		} else {
-			Value = NULL;
-		}
+	TVar(char* _name, void* _value, uint32_t _ByteSize) { //_value is a pointer to object (func address, var)		
+		Name = (char*)CloneVar(_name, strlen(_name) + 1);
+		Value = CloneVar(_value, _ByteSize);		
 		Tensor = NULL;
 		TensorSize = 0; VarType = EVAR_TYPE_FLOAT;
 	}

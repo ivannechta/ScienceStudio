@@ -4,6 +4,7 @@
 #include "settings.h"
 #include <windows.h>
 #include "parcecmd.h"
+#include "tablevars.h"
 const uint16_t ConsoleCommandSize = 1000;
 const uint16_t OUTPUT_TEXT_MAX = 500; // Console do not shows long text
 DWORD WINAPI Console_Thread(void* _core);
@@ -15,6 +16,7 @@ private:
 public:
 	TContext* Context_lnk;
 	TSettings* Settings;
+	struct TTableVars* Table;
 	char* ConsoleInput;		// User entered command
 	void	Prompt();
 	void	Execute();			// Parse and Execute console command
@@ -24,7 +26,8 @@ public:
 	TCore() {
 		Context_lnk = &Context;
 		ConsoleInput = new char[ConsoleCommandSize + 1];
-		Settings = new TSettings();
+		Table = new TTableVars();
+		Settings = new TSettings(Table);
 		CMD = new TParceCmd(this);
 	}
 	~TCore() {

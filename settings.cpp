@@ -12,16 +12,19 @@ void TSettings::ParceSettings()
     while (!feof(f)) {
         char* Alias = new char[256];
         char* Namespace = new char[256];
+        int ParamCount;
         char* ModuleFileName = new char[256];
         char* FunctionName = new char[256];
         fscanf_s(f, "%s", Alias, 255);
         fscanf_s(f, "%s", Namespace, 255);
+        fscanf_s(f, "%d", &ParamCount);
         fscanf_s(f, "%s", ModuleFileName, 255);
         fscanf_s(f, "%s", FunctionName, 255);
 
         TSettings_Record* rec = new TSettings_Record;
         rec->AliasName = Alias;
         rec->Namespace = Namespace;
+        rec->ParamCount = ParamCount;
         rec->ModuleFileName = ModuleFileName;
         rec->FunctionName = FunctionName;
         LoadFunction(rec);
@@ -36,13 +39,17 @@ int TSettings::LoadFunction(TSettings_Record* _rec)
         printf("Failed to load module. Module '%s', func '%s'\n", _rec->ModuleFileName, _rec->FunctionName);
         return -1;
     }    
-    ModuleFunction[SettingsSize] = (ModuleFuncType)GetProcAddress(hDll, _rec->FunctionName);
+    ModuleFuncType _func;
+    _func = (ModuleFuncType)GetProcAddress(hDll, _rec->FunctionName);
+    ModuleFunction[SettingsSize] = _func;
 
     if (!ModuleFunction[SettingsSize]) {
         printf("Failed to find function. Module '%s', func '%s'\n", _rec->ModuleFileName, _rec->FunctionName);
         return -1;
     }
     SettingsRecord[SettingsSize++] = _rec;
+    /* Add to Table*/
+    Table->AddFunc(_rec->AliasName, _rec->Namespace, _rec->ParamCount, _func);
     return 0;
 }
 

@@ -2,6 +2,13 @@
 #include <inttypes.h>
 #include<stdio.h>
 
+void* TVar::CloneVar(void* _addr, int _size)
+{
+	void* _Object = new char[_size];
+	memcpy(_Object, _addr, _size);
+	return _Object;
+}
+
 void* TVar::GetValue(int* _dimen)
 {
 	if (VarType == EVAR_TYPE_FUNC) {
@@ -21,5 +28,5 @@ void* TVar::GetValue(int* _dimen)
 		offset += (_dimen[i] * tmp);		
 	}
 	printf("res=%d\n", offset);	
-	return &((float*)Value)[offset];
+	return &((double*)Value)[offset];
 }

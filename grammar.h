@@ -9,7 +9,7 @@ struct TStack {
 	struct TStack* next;
 };
 struct TExpressionResult {
-	float Value;
+	double Value;
 	TStack* stk;
 };
 class TGrammar
@@ -39,11 +39,10 @@ public:
 
 	void PolizArithm(char* _expression);
 	void CalcExpr(char* _expression);
-	float ApplySign(float _a, char znak, float _b);
-	void CreateScalarVar(TStack* stk, float _value);
+	double ApplySign(double _a, char znak, double _b);	
 	TExpressionResult CalcOneStep(TStack* stk);
 
-	TGrammar(struct TTableVars* _table) {
+	TGrammar(TTableVars* _table) {
 		Stack = Stack_tmp = NULL;
 		ExpressionResult = { 0, NULL };
 		TableVars = _table;

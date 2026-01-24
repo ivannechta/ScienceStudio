@@ -240,7 +240,7 @@ void TGrammar::CalcExpr(char* _expression) {
     TExpressionResult res=CalcOneStep(Stack);
     printf("Result = %.2f\n",res.Value);
 }
-float TGrammar::ApplySign(float _a,char znak ,float _b) {
+double TGrammar::ApplySign(double _a,char znak ,double _b) {
     switch (znak)
     {
     case '+': return _a + _b;
@@ -253,6 +253,7 @@ float TGrammar::ApplySign(float _a,char znak ,float _b) {
     }
 }
 
+/*
 void TGrammar::CreateScalarVar(TStack* stk, float _value) {
     float* a = new float;
     int* Tensor_a = new int[1]; Tensor_a[0] = 1;
@@ -263,11 +264,11 @@ void TGrammar::CreateScalarVar(TStack* stk, float _value) {
     var_a->Value = a;
     TableVars->Add(var_a);
 }
+*/
 
 TExpressionResult TGrammar::CalcOneStep(TStack* stk )
 {
-	TExpressionResult res = { 0,NULL }, res_a, res_b;
-    float a, b;
+	TExpressionResult res = { 0,NULL }, res_a, res_b;    
     if (!stk) { 
         printf("Expression execution failed\n");
         return res;
@@ -275,8 +276,8 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
     char znak = stk->data[0];
     if (Priority(znak) != 0) { //znak
         res_a = CalcOneStep(stk->next);
-        if (znak == '=') { 
-            CreateScalarVar(res_a.stk, res_a.Value);
+        if (znak == '=') {
+            TableVars->AddScalar(res_a.stk->data, res_a.Value);
             res.Value = res_a.Value;
             res.stk = res_a.stk;
             return res;
@@ -287,11 +288,11 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         res.stk = res_b.stk;
         return res;
     } else { // it is not a sign, but a Name (var or func)
-        TVar* var; float* var_tmp;
+        TVar* var; double* var_tmp;
 		if (ReadName(stk->data, 0) != -1) {
 			if ((var = TableVars->Search(stk->data)) != NULL) {
                 if (var->VarType == EVAR_TYPE_FLOAT) {
-                    var_tmp = (float*)(var->Value);
+                    var_tmp = (double*)(var->Value);
                     res.Value = *var_tmp;
                     res.stk = stk->next;
                     return res;
@@ -311,4 +312,5 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
             return res;
 		}
     }
+    return res;
 }
