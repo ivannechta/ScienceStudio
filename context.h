@@ -1,11 +1,16 @@
 #pragma once
 #include <stdlib.h>
 #include "header.h"
+#include "vars.h"
 const uint16_t MAX_PARAMS = 256;
 /*There are just Fields with simple types, because this header will be included in modules*/
-struct TArguments {
+/*struct TArguments {
 	int argc;
 	char** argv;
+};*/
+struct TArguments {
+	int argc;
+	TVar** argv;
 };
 class TContext {
 	void InitArgs();
@@ -19,7 +24,7 @@ public:
 		FileName = NULL;
 		GL_surface = Vars = Settings = NULL;
 		Arguments = (void*)new TArguments;
-		InitArgs();
+		//InitArgs();
 	}
 	void AddArgs(char * _param);
 	void ClearArgs();

@@ -86,7 +86,7 @@ bool TParceCmd::ParceFunctionCall(char* text, int i) {
 	}
 	return true;
 }
-bool TParceCmd::ParceParams(char* text, int i)
+bool TParceCmd::ParceParams(char* text, int i) //depricated
 {
 	char *str = &text[i];	
 	char* token;
@@ -95,14 +95,14 @@ bool TParceCmd::ParceParams(char* text, int i)
 	char delim[] = "(, )";
 
 	// First call: tokenize the string by comma
-
+	/*
 	token = strtok_s(str, delim, &context); // Note: context and max_len often passed by reference in implementations
 	Core->Context_lnk->ClearArgs();
 	while (token != NULL) {
 		printf("ParcedParams->%s\n", token);
 		Core->Context_lnk->AddArgs(token);
 		token = strtok_s(NULL, delim, &context);
-	}
+	}*/
 	return true;
 }
 void TParceCmd::Parce()

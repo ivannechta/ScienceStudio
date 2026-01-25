@@ -1,7 +1,7 @@
 #include "grammar.h"
+#include "context.h"
 
 char* TGrammar::pop(TStack** _stack)
-
 {
 	struct TStack* tmp = *_stack;
 	char* data;
@@ -140,6 +140,7 @@ char* TGrammar::GetNewStr(char* _expression, int _start, int _end)
 }
 void TGrammar::PolizArithm(char* _expression)
 {
+	TVar* var = NULL;
 	int i = 0;
     int j = 0;
     int size = strlen(_expression);
@@ -158,7 +159,9 @@ void TGrammar::PolizArithm(char* _expression)
         {
             StartLexemma = false;
             str = GetNewStr(_expression, i, j);
-            if (strcmp(str, "func") == 0) { //Fix checking function by VAR/func search
+			var = TableVars->Search(str);
+            //if (strcmp(str, "func") == 0) { //Fix checking function by VAR/func search
+            if (var && var->VarType == EVAR_TYPE_FUNC){
                 push(&Stack_tmp, str);
             }
             else {
@@ -198,7 +201,9 @@ void TGrammar::PolizArithm(char* _expression)
                     if (znak[0] != ',') {
                         pop(&Stack_tmp); // pop '('
                     }
-                    if (strcmp(Stack_tmp->data, "func") == 0) { // Fix checking function by VAR/func search
+                    var = TableVars->Search(Stack_tmp->data);
+                    if (var && var->VarType == EVAR_TYPE_FUNC) {
+                    //if (strcmp(Stack_tmp->data, "func") == 0) { // Fix checking function by VAR/func search
                         stk_znak = pop(&Stack_tmp); // pop function name
                         if (stk_znak) {
                             push(&Stack, stk_znak);
@@ -253,22 +258,11 @@ double TGrammar::ApplySign(double _a,char znak ,double _b) {
     }
 }
 
-/*
-void TGrammar::CreateScalarVar(TStack* stk, float _value) {
-    float* a = new float;
-    int* Tensor_a = new int[1]; Tensor_a[0] = 1;
-    *a = _value;
-    TVar* var_a = new TVar(stk->data, &a, sizeof(a));
-    var_a->Tensor = Tensor_a;	var_a->TensorSize = 1;
-    var_a->VarType = EVAR_TYPE_FLOAT;
-    var_a->Value = a;
-    TableVars->Add(var_a);
-}
-*/
-
 TExpressionResult TGrammar::CalcOneStep(TStack* stk )
 {
-	TExpressionResult res = { 0,NULL }, res_a, res_b;    
+    ModuleFuncType FunctionCaller;
+    
+	TExpressionResult res = { 0,NULL }, res_a, res_b;
     if (!stk) { 
         printf("Expression execution failed\n");
         return res;
@@ -290,7 +284,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
     } else { // it is not a sign, but a Name (var or func)
         TVar* var; double* var_tmp;
 		if (ReadName(stk->data, 0) != -1) {
-			if ((var = TableVars->Search(stk->data)) != NULL) {
+			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
                 if (var->VarType == EVAR_TYPE_FLOAT) {
                     var_tmp = (double*)(var->Value);
                     res.Value = *var_tmp;
@@ -299,10 +293,36 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                 }
                 else {
                     // TODO
-                    printf("Function call\n");
+                    // create args array
+                    struct TArguments* Args = (TArguments*)Context->Arguments;
+                    TVar* FuncArg;
+                    TExpressionResult FuncRes;
+                    Args->argc = var->Tensor[0]; // argument counts
+                    Args->argv = new TVar*[Args->argc];
+                    FuncRes.stk = stk->next;
+                    for (int i = 0; i < Args->argc; i++) {
+                        FuncRes = CalcOneStep(FuncRes.stk); // Calc every argument
+                        FuncArg = new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));
+						int Tensor[] = { 1 }; FuncArg->Tensor = (int*)FuncArg->CloneVar(Tensor, sizeof(int)); FuncArg->TensorSize = 1;
+                        Args->argv[i] = FuncArg; // put calculated argument in structure for transmitt to dll
+                        printf("\nFunc ARG%.2f\n", (FuncRes.Value));
+                    }                    
+                    // call func & return result
+                    FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));
+                    TVar* FuncResult = FunctionCaller();
+                    // TODO check what type was returned: double or string or array Name of Tvar contains a type
+					res.Value = *(double*)FuncResult->Value;
+                    res.stk = FuncRes.stk;
+
+                    // delete arguments form memory after func call(free)
+                    for (int i = 0; i < Args->argc; i++) {
+                        delete Args->argv[i];
+                    }
+                    delete FuncResult;
+
+                    return res;
                 }
             }
-
 		}
 		else if ((ReadFloat(stk->data, 0) != -1) ||
                 (ReadFloat(stk->data, 0) != -1))

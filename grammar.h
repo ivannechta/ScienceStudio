@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "tablevars.h"
+#include "context.h"
 
 struct TStack {
 	char* data;
@@ -12,12 +13,15 @@ struct TExpressionResult {
 	double Value;
 	TStack* stk;
 };
+typedef TVar* (*ModuleFuncType)();
+
 class TGrammar
 {
 private:
 	//struct TStack* Stack, *Stack_tmp;
-	struct TTableVars* TableVars;
+	TTableVars* TableVars;
 	struct TExpressionResult ExpressionResult;
+	TContext* Context;
 
 public:
 	//TODO: Unary minus before name
@@ -42,9 +46,10 @@ public:
 	double ApplySign(double _a, char znak, double _b);	
 	TExpressionResult CalcOneStep(TStack* stk);
 
-	TGrammar(TTableVars* _table) {
+	TGrammar(TTableVars* _table, TContext* _context) {
 		Stack = Stack_tmp = NULL;
 		ExpressionResult = { 0, NULL };
 		TableVars = _table;
+		Context = _context;
 	}
 };

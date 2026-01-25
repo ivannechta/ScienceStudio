@@ -2,8 +2,9 @@
 #include "header.h"
 #include "tablevars.h"
 
+
 const uint16_t Settings_Max_Modules=100;
-typedef int (*ModuleFuncType)();
+typedef TVar* (*ModuleFuncType)();
 struct TSettings_Record{
 	char* AliasName;	// Name in Studio
 	char* Namespace;

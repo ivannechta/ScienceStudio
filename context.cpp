@@ -5,7 +5,7 @@ void TContext::InitArgs()
 {
 	struct TArguments* ARGS = (struct TArguments*)Arguments;
 	ARGS->argc = 0;
-	ARGS->argv = new char* [MAX_PARAMS];
+	ARGS->argv = new TVar* [MAX_PARAMS];
 	for (uint16_t i = 0; i < MAX_PARAMS; i++) {
 		ARGS->argv[i] = NULL;
 	}
@@ -13,7 +13,7 @@ void TContext::InitArgs()
 
 void TContext::AddArgs(char* _param)
 {
-	struct TArguments* ARGS = (struct TArguments*)Arguments;
+	/*struct TArguments* ARGS = (struct TArguments*)Arguments;
 	char* arg;
 
 	if (ARGS->argc == MAX_PARAMS - 1) return;
@@ -21,7 +21,7 @@ void TContext::AddArgs(char* _param)
 	arg = new char[257];
 	strncpy_s(arg, 256, _param, 256);
 	ARGS->argv[ARGS->argc] = arg;
-	ARGS->argc++;
+	ARGS->argc++;*/
 }
 
 void TContext::ClearArgs()

@@ -55,8 +55,8 @@ void TTableVars::AddScalar(char* _name, double _value) {
 void TTableVars::AddFunc(char* _name, char* _namespace, int _paramsCount, void* _address)
 {
 	void* a = &_address;
-    int Tensor_a[] = {_paramsCount};    
-    TVar* var_a = new TVar(_name, &a, sizeof(a));    
+    int Tensor_a[] = {_paramsCount};
+    TVar* var_a = new TVar(_name, a, sizeof(a));
 	var_a->Other = (char*)CloneVar(_namespace, strlen(_namespace) + 1);
 	var_a->Tensor = (int*)CloneVar(Tensor_a, sizeof(int)); var_a->TensorSize = 1;
     var_a->VarType = EVAR_TYPE_FUNC;    
