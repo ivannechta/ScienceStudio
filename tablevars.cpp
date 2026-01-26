@@ -28,19 +28,27 @@ int TTableVars::SearchIndex(char* _name)
     return -1;
 }
 
-void TTableVars::Add(TVar* _var)
+void TTableVars::Add(char* _NewName, TVar* _var)
 {
-    int i = SearchIndex(_var->Name);
+    TVar* var;
+    if (_var->VarType == EVAR_TYPE_FLOAT) {
+        var = _var->Clone(_NewName);;
+    } else { 
+        var = _var;
+    }    
+
+    int i = SearchIndex(var->Name);
     if (i==-1) { //create new
-        Table[TableSize] = _var;
+        Table[TableSize] = var;
         TableSize++;
     }
     else { //Update var
         delete Table[i];
-        Table[i] = _var;
+        Table[i] = var;
     }
 }
 
+/*
 void TTableVars::AddScalar(char* _name, double _value) {
     double* a = new double;
     int* Tensor_a = new int[1]; Tensor_a[0] = 1;
@@ -50,17 +58,17 @@ void TTableVars::AddScalar(char* _name, double _value) {
     var_a->VarType = EVAR_TYPE_FLOAT;
     var_a->Value = a;
     Add(var_a);
-}
+}*/
 
 void TTableVars::AddFunc(char* _name, char* _namespace, int _paramsCount, void* _address)
 {
 	void* a = &_address;
     int Tensor_a[] = {_paramsCount};
     TVar* var_a = new TVar(_name, a, sizeof(a));
-	var_a->Other = (char*)CloneVar(_namespace, strlen(_namespace) + 1);
+	var_a->Other = (char*)CloneVar(_namespace, (int)strlen(_namespace) + 1);
 	var_a->Tensor = (int*)CloneVar(Tensor_a, sizeof(int)); var_a->TensorSize = 1;
     var_a->VarType = EVAR_TYPE_FUNC;    
-    Add(var_a);
+    Add((char*)"func",var_a);
 }
 
 void TTableVars::ShowTable() const

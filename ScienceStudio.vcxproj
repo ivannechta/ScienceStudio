@@ -133,7 +133,7 @@
     <ClCompile Include="ScienceStudio.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="tablevars.cpp" />
-    <ClCompile Include="tgrammar.cpp" />
+    <ClCompile Include="grammar.cpp" />
     <ClCompile Include="vars.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -105,7 +105,8 @@ int TGrammar::ReadFloat(char* _expression, int _pos)
 bool TGrammar::isNameChar(unsigned char ch) {
     if (isDigit(ch)) return true;
     if (((ch >= 'a') && (ch <= 'z')) ||
-        ((ch >= 'A') && (ch <= 'Z'))) return true;
+        ((ch >= 'A') && (ch <= 'Z')) ||
+		(ch == '.')) return true;
     return false;
 }
 bool TGrammar::isDigit(char ch) {
@@ -143,7 +144,7 @@ void TGrammar::PolizArithm(char* _expression)
 	TVar* var = NULL;
 	int i = 0;
     int j = 0;
-    int size = strlen(_expression);
+    int size = (int)strlen(_expression);
 	char* stk_znak = NULL;
     char* str; // part of the expression with name or float
     bool StartLexemma = true; // unary minus possible, but after name just arithmetic minus appears
@@ -236,22 +237,76 @@ void TGrammar::PolizArithm(char* _expression)
 	}
 
 	ShowStack(Stack);
-
 	//return nullptr;
     //return Stack
 }
 void TGrammar::CalcExpr(char* _expression) {
     PolizArithm(_expression);
     TExpressionResult res=CalcOneStep(Stack);
-    printf("Result = %.2f\n",res.Value);
+    if (res.Value) {
+        double* d = (double*)((TVar*)(res.Value))->Value;
+        printf("Result = %.2f\n", *d);
+    }
+
+    while (Stack) { // Clear stack for future using
+         pop(&Stack);        
+    }
 }
-double TGrammar::ApplySign(double _a,char znak ,double _b) {
+
+#pragma message( "TODO: Depricated ")
+double TGrammar::ApplySign(double _a,char znak ,double _b) { 
     switch (znak)
     {
     case '+': return _a + _b;
     case '-': return _a - _b;
     case '*': return _a * _b;
     case '/': return _a / _b;    
+    default:
+        printf("Error in ApplyZnak\n");
+        return 0;
+    }
+}
+TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
+    TVar* var;// = new TVar("ApplySign", );
+    double* d = new double;
+    switch (znak)
+    {
+    case '+':
+        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
+            (_b->VarType == EVAR_TYPE_FLOAT)) {
+            *d = *(double*)_a->Value + *(double*)_b->Value;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));
+            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+        }
+        else { return NULL; }
+        return var;
+    case '-': 
+        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
+            (_b->VarType == EVAR_TYPE_FLOAT)) {
+            *d = *(double*)_a->Value - *(double*)_b->Value;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));
+            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+        }
+        else { return NULL; }
+        return var;        
+    case '*': 
+        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
+            (_b->VarType == EVAR_TYPE_FLOAT)) {
+            *d = *(double*)_a->Value * *(double*)_b->Value;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));
+            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+        }
+        else { return NULL; }
+        return var;
+    case '/': 
+        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
+            (_b->VarType == EVAR_TYPE_FLOAT)) {
+            *d = *(double*)_a->Value / *(double*)_b->Value;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));
+            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+        }
+        else { return NULL; }
+        return var;
     default:
         printf("Error in ApplyZnak\n");
         return 0;
@@ -270,14 +325,20 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
     char znak = stk->data[0];
     if (Priority(znak) != 0) { //znak
         res_a = CalcOneStep(stk->next);
-        if (znak == '=') {
-            TableVars->AddScalar(res_a.stk->data, res_a.Value);
-            res.Value = res_a.Value;
+        if (!res_a.Value) {
+            return res_a;
+        }
+        if (znak == '=') {            
+            TableVars->Add(res_a.stk->data, res_a.Value);
+            res.Value = res_a.Value->Clone((char*)"apply=");
             res.stk = res_a.stk;
             return res;
         }
         res_b = CalcOneStep(res_a.stk);
-        //printf("%.2f %c %.2f\n", res_a.Value, znak, res_b.Value);
+        if (!res_b.Value) {
+            return res_b;
+        }
+        
         res.Value = ApplySign(res_a.Value, znak, res_b.Value);
         res.stk = res_b.stk;
         return res;
@@ -286,8 +347,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
 		if (ReadName(stk->data, 0) != -1) {
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
                 if (var->VarType == EVAR_TYPE_FLOAT) {
-                    var_tmp = (double*)(var->Value);
-                    res.Value = *var_tmp;
+                    res.Value = var->Clone((char*)"var");
                     res.stk = stk->next;
                     return res;
                 }
@@ -302,32 +362,40 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                     FuncRes.stk = stk->next;
                     for (int i = 0; i < Args->argc; i++) {
                         FuncRes = CalcOneStep(FuncRes.stk); // Calc every argument
-                        FuncArg = new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));
+                        if (!FuncRes.Value) {
+                            return FuncRes;
+                        }
+                        FuncArg = FuncRes.Value->Clone((char*)"funcArg");//new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));
 						int Tensor[] = { 1 }; FuncArg->Tensor = (int*)FuncArg->CloneVar(Tensor, sizeof(int)); FuncArg->TensorSize = 1;
                         Args->argv[i] = FuncArg; // put calculated argument in structure for transmitt to dll
-                        printf("\nFunc ARG%.2f\n", (FuncRes.Value));
-                    }                    
+                    }
                     // call func & return result
                     FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));
                     TVar* FuncResult = FunctionCaller();
                     // TODO check what type was returned: double or string or array Name of Tvar contains a type
-					res.Value = *(double*)FuncResult->Value;
+					res.Value = FuncResult;
                     res.stk = FuncRes.stk;
-
                     // delete arguments form memory after func call(free)
                     for (int i = 0; i < Args->argc; i++) {
                         delete Args->argv[i];
                     }
-                    delete FuncResult;
-
+                    //delete FuncResult;
                     return res;
                 }
             }
+            printf("Var not found\n");
+            res.Value = NULL;
 		}
 		else if ((ReadFloat(stk->data, 0) != -1) ||
                 (ReadFloat(stk->data, 0) != -1))
         {
-            res.Value = atof(stk->data);
+            TVar* var;
+            double* _d = new double;
+            *_d = atof(stk->data);
+            var = new TVar((char*)"Num", _d, sizeof(double));
+            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var->Other = NULL;
+            res.Value = var;
             res.stk = stk->next;
             return res;
 		}

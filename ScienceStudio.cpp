@@ -8,7 +8,6 @@
 
 bool isRunning = true;
 
-
 int main()
 {	
 	TCore Core;
@@ -17,6 +16,8 @@ int main()
 	Core.Settings->ParceSettings();
 	
 	TGrammar g(Core.Table, Core.Context_lnk);
+	//g.CalcExpr((char*)"a=1+2");
+	//g.CalcExpr((char*)"b=a");
 	g.CalcExpr((char*)"a=sum(1,2)");
 	g.CalcExpr((char*)"b=1+a*5");
 	Core.Table->ShowTable();

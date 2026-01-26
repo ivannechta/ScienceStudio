@@ -9,6 +9,23 @@ void* TVar::CloneVar(void* _addr, int _size)
 	return _Object;
 }
 
+TVar* TVar::Clone(char* _NewName)
+{
+	TVar* var = NULL;
+	if (VarType == EVAR_TYPE_FLOAT) {
+		double* d = new double;
+		*d = *(double*)Value;
+		var = new TVar(_NewName, d, sizeof(double));
+		var->VarType = VarType;
+		int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+		Other = NULL;
+	} else {
+		printf("Error. You clone complex object\n");
+		// TODO copy Arrays
+	}
+	return var;
+}
+
 void* TVar::GetValue(int* _dimen)
 {
 	if (VarType == EVAR_TYPE_FUNC) {

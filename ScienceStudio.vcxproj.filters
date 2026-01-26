@@ -30,7 +30,7 @@
     <ClCompile Include="context.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="tgrammar.cpp">
+    <ClCompile Include="grammar.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="vars.cpp">

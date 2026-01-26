@@ -10,7 +10,7 @@ struct TStack {
 	struct TStack* next;
 };
 struct TExpressionResult {
-	double Value;
+	TVar* Value;
 	TStack* stk;
 };
 typedef TVar* (*ModuleFuncType)();
@@ -43,7 +43,9 @@ public:
 
 	void PolizArithm(char* _expression);
 	void CalcExpr(char* _expression);
-	double ApplySign(double _a, char znak, double _b);	
+	double ApplySign(double _a, char znak, double _b);
+	TVar* ApplySign(TVar* _a, char znak, TVar* _b);
+
 	TExpressionResult CalcOneStep(TStack* stk);
 
 	TGrammar(TTableVars* _table, TContext* _context) {

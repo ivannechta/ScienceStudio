@@ -17,14 +17,16 @@ public:
 	int* Tensor;
 	int TensorSize;
 	void* CloneVar(void* _addr, int _size);
+	TVar* Clone(char* _NewName);
 	//void SetValue(void* _value, int* _dimen);
 	void* GetValue(int* _dimen);
 	//void GetScalarValue();
 
 	TVar(char* _name, void* _value, uint32_t _ByteSize) { //_value is a pointer to object (func address, var)		
-		Name = (char*)CloneVar(_name, strlen(_name) + 1);
-		Value = CloneVar(_value, _ByteSize);		
+		Name = (char*)CloneVar(_name, (int)strlen(_name) + 1);
+		Value = CloneVar(_value, _ByteSize);
 		Tensor = NULL;
+		Other = NULL;
 		TensorSize = 0; VarType = EVAR_TYPE_FLOAT;
 	}
 

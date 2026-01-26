@@ -16,7 +16,7 @@ private:
 public:
 	TContext* Context_lnk;
 	TSettings* Settings;
-	struct TTableVars* Table;
+	TTableVars* Table;
 	char* ConsoleInput;		// User entered command
 	void	Prompt();
 	void	Execute();			// Parse and Execute console command
