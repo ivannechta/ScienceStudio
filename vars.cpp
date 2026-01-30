@@ -2,31 +2,68 @@
 #include <inttypes.h>
 #include<stdio.h>
 
-void* TVar::CloneVar(void* _addr, int _size)
+void* TVar::CloneMem(void* _addr, int _size)
 {
+	if (!_addr) return NULL;
 	void* _Object = new char[_size];
 	memcpy(_Object, _addr, _size);
 	return _Object;
 }
 
-TVar* TVar::Clone(char* _NewName)
+TVar* TVar::CloneTVar(char* _NewName)
 {
 	TVar* var = NULL;
+
 	if (VarType == EVAR_TYPE_FLOAT) {
 		double* d = new double;
 		*d = *(double*)Value;
 		var = new TVar(_NewName, d, sizeof(double));
+		var->VarType = VarType;		
+		var->TensorSize = 1;
+		var->Other = NULL;
+		return var;
+	}
+
+	if (VarType == EVAR_TYPE_STRING) {		
+		var = new TVar(_NewName, Value, TensorSize + 1);
 		var->VarType = VarType;
-		int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
-		Other = NULL;
-	} else {
-		printf("Error. You clone complex object\n");
+		var->TensorSize = 1;
+		var->Other = NULL;
+		return var;
+	}
+
+	if (VarType == EVAR_TYPE_FUNC) {
+		var = new TVar(_NewName, Value, sizeof(void*));
+		var->VarType = VarType;
+		var->TensorSize = TensorSize;
+		if (Other) {
+			int _len = strlen(Other);
+			var->Other = new char[_len + 1];
+			strcpy_s(var->Other, _len + 1, Other);
+		} else { 
+			var->Other = NULL; 
+		}
+		return var;
+	}
+	if (VarType == EVAR_TYPE_ARRAY){
+		for (int i = 0; i < TensorSize; i++) {
+			var = new TVar(_NewName, Value, sizeof(void*));
+			var->VarType = VarType;
+			var->TensorSize = TensorSize;
+			var->Other = NULL;
+			var->Value = new TVar**[TensorSize];
+
+			TVar**_src= (TVar**)(Value);
+			TVar* el_src = _src[i];
+			TVar** _dst = (TVar**)var->Value;
+			_dst[i] = _src[i]->CloneTVar(NULL);
+		}
 		// TODO copy Arrays
 	}
 	return var;
 }
 
-void* TVar::GetValue(int* _dimen)
+/*void* TVar::GetValue(int* _dimen)
 {
 	if (VarType == EVAR_TYPE_FUNC) {
 		return Value;
@@ -46,4 +83,4 @@ void* TVar::GetValue(int* _dimen)
 	}
 	printf("res=%d\n", offset);	
 	return &((double*)Value)[offset];
-}
+}*/

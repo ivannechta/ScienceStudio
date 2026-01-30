@@ -275,8 +275,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         if ((_a->VarType == EVAR_TYPE_FLOAT) &&
             (_b->VarType == EVAR_TYPE_FLOAT)) {
             *d = *(double*)_a->Value + *(double*)_b->Value;
-            var = new TVar((char*)"ApplySign", d, sizeof(double));
-            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));            
+            var->TensorSize = 1;
         }
         else { return NULL; }
         return var;
@@ -284,8 +284,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         if ((_a->VarType == EVAR_TYPE_FLOAT) &&
             (_b->VarType == EVAR_TYPE_FLOAT)) {
             *d = *(double*)_a->Value - *(double*)_b->Value;
-            var = new TVar((char*)"ApplySign", d, sizeof(double));
-            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));            
+            var->TensorSize = 1;
         }
         else { return NULL; }
         return var;        
@@ -293,8 +293,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         if ((_a->VarType == EVAR_TYPE_FLOAT) &&
             (_b->VarType == EVAR_TYPE_FLOAT)) {
             *d = *(double*)_a->Value * *(double*)_b->Value;
-            var = new TVar((char*)"ApplySign", d, sizeof(double));
-            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));            
+            var->TensorSize = 1;
         }
         else { return NULL; }
         return var;
@@ -302,8 +302,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         if ((_a->VarType == EVAR_TYPE_FLOAT) &&
             (_b->VarType == EVAR_TYPE_FLOAT)) {
             *d = *(double*)_a->Value / *(double*)_b->Value;
-            var = new TVar((char*)"ApplySign", d, sizeof(double));
-            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var = new TVar((char*)"ApplySign", d, sizeof(double));            
+            var->TensorSize = 1;
         }
         else { return NULL; }
         return var;
@@ -330,7 +330,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         }
         if (znak == '=') {            
             TableVars->Add(res_a.stk->data, res_a.Value);
-            res.Value = res_a.Value->Clone((char*)"apply=");
+            res.Value = res_a.Value->CloneTVar((char*)"apply=");
             res.stk = res_a.stk;
             return res;
         }
@@ -347,7 +347,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
 		if (ReadName(stk->data, 0) != -1) {
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
                 if (var->VarType == EVAR_TYPE_FLOAT) {
-                    res.Value = var->Clone((char*)"var");
+                    res.Value = var->CloneTVar((char*)"var");
                     res.stk = stk->next;
                     return res;
                 }
@@ -357,7 +357,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                     struct TArguments* Args = (TArguments*)Context->Arguments;
                     TVar* FuncArg;
                     TExpressionResult FuncRes;
-                    Args->argc = var->Tensor[0]; // argument counts
+                    Args->argc = var->TensorSize; // argument counts
                     Args->argv = new TVar*[Args->argc];
                     FuncRes.stk = stk->next;
                     for (int i = 0; i < Args->argc; i++) {
@@ -365,8 +365,8 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                         if (!FuncRes.Value) {
                             return FuncRes;
                         }
-                        FuncArg = FuncRes.Value->Clone((char*)"funcArg");//new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));
-						int Tensor[] = { 1 }; FuncArg->Tensor = (int*)FuncArg->CloneVar(Tensor, sizeof(int)); FuncArg->TensorSize = 1;
+                        FuncArg = FuncRes.Value->CloneTVar((char*)"funcArg");//new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));						
+                        FuncArg->TensorSize = 1;
                         Args->argv[i] = FuncArg; // put calculated argument in structure for transmitt to dll
                     }
                     // call func & return result
@@ -392,8 +392,8 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
             TVar* var;
             double* _d = new double;
             *_d = atof(stk->data);
-            var = new TVar((char*)"Num", _d, sizeof(double));
-            int Tensor[] = { 1 }; var->Tensor = (int*)var->CloneVar(Tensor, sizeof(int)); var->TensorSize = 1;
+            var = new TVar((char*)"Num", _d, sizeof(double));            
+            var->TensorSize = 1;
             var->Other = NULL;
             res.Value = var;
             res.stk = stk->next;

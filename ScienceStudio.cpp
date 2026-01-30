@@ -8,6 +8,43 @@
 
 bool isRunning = true;
 
+TVar* CreateArray1D(double a, double b) {
+	double* d1 = new double;
+	*d1 = a;
+	TVar* A = new TVar(NULL, d1, sizeof(double));
+	A->VarType = EVAR_TYPE_FLOAT;
+	A->TensorSize = 1;
+
+	double* d2 = new double;
+	*d2 = b;
+	TVar* B = new TVar(NULL, d2, sizeof(double));
+	B->VarType = EVAR_TYPE_FLOAT;
+	B->TensorSize = 1;
+
+	TVar* C = new TVar((char*)"MyArray1D", NULL, sizeof(double));
+	C->VarType = EVAR_TYPE_ARRAY;
+	C->TensorSize = 2;
+	C->Value = new TVar * *[C->TensorSize];
+	TVar** _p = (TVar**)C->Value;
+	_p[0] = A; _p[1] = B;	
+	return C;
+}
+TVar* CreateArray2D() {
+	TVar* A = CreateArray1D(11, 12);
+	TVar* B = CreateArray1D(21, 22);
+
+	TVar* C = new TVar((char*)"MyArray2D", NULL, sizeof(double));
+	C->VarType = EVAR_TYPE_ARRAY;
+	C->TensorSize = 2;
+	C->Value = new TVar * *[C->TensorSize];
+	for (int i = 0; i < 2; i++) {
+		TVar** _p = (TVar**)C->Value;
+		_p[0] = A; _p[1] = B;
+		return C;
+	}
+}
+
+
 int main()
 {	
 	TCore Core;
@@ -16,10 +53,16 @@ int main()
 	Core.Settings->ParceSettings();
 	
 	TGrammar g(Core.Table, Core.Context_lnk);
+	Core.Table->ShowTable();
 	//g.CalcExpr((char*)"a=1+2");
 	//g.CalcExpr((char*)"b=a");
 	g.CalcExpr((char*)"a=sum(1,2)");
 	g.CalcExpr((char*)"b=1+a*5");
+
+	
+	Core.Table->Add((char*)"MyNewArray", CreateArray2D());
+	
+	
 	Core.Table->ShowTable();
 
 	SHOW("Enter commands\n");

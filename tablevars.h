@@ -6,7 +6,7 @@ const int MAX_TABLE_VARS_SIZE = 256;
 class TTableVars
 {
 private:
-	void* CloneVar(void* _addr, int _size);
+	void* CloneMem(void* _addr, int _size);
 	TVar* CloneTVar();
 public:
 	TVar** Table;
@@ -15,9 +15,11 @@ public:
 	TVar* Search(char* _name);
 	int SearchIndex(char* _name);
 	void Add(char* _name, TVar* _var);
-	void AddScalar(char* _name, double _value);
+	//void AddScalar(char* _name, double _value);
 	void AddFunc(char* _name, char* _namespace, int _paramsCount, void* Address);
 	void ShowTable() const;
+
+	void ShowVar(TVar* var) const;
 
 
 

@@ -2,89 +2,122 @@
 #include <string.h>
 #include <stdio.h>
 
-void* TTableVars::CloneVar(void* _addr, int _size)
+void* TTableVars::CloneMem(void* _addr, int _size)
 {
-    void* _Object = new char[_size];
-    memcpy(_Object, _addr, _size);
-    return _Object;
+	void* _Object = new char[_size];
+	memcpy(_Object, _addr, _size);
+	return _Object;
 }
 
 TVar* TTableVars::Search(char* _name)
 {
-    for (int i = 0; i < TableSize; i++) {
-        if (strcmp(Table[i]->Name, _name) == 0) {
-            return Table[i];
-        }
-    }
-    return nullptr;
+	for (int i = 0; i < TableSize; i++) {
+		if (strcmp(Table[i]->Name, _name) == 0) {
+			return Table[i];
+		}
+	}
+	return nullptr;
 }
 int TTableVars::SearchIndex(char* _name)
 {
-    for (int i = 0; i < TableSize; i++) {
-        if (strcmp(Table[i]->Name, _name) == 0) {
-            return i;
-        }
-    }
-    return -1;
+	for (int i = 0; i < TableSize; i++) {
+		if (strcmp(Table[i]->Name, _name) == 0) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 void TTableVars::Add(char* _NewName, TVar* _var)
 {
-    TVar* var;
-    if (_var->VarType == EVAR_TYPE_FLOAT) {
-        var = _var->Clone(_NewName);;
-    } else { 
-        var = _var;
-    }    
+	TVar* var;
+	if ((_var->VarType == EVAR_TYPE_FLOAT) ||
+		(_var->VarType == EVAR_TYPE_FUNC) ||
+		(_var->VarType == EVAR_TYPE_STRING))
+	{
+		var = _var->CloneTVar(_NewName);
+	} else {
+		var = _var;
+	}
 
-    int i = SearchIndex(var->Name);
-    if (i==-1) { //create new
-        Table[TableSize] = var;
-        TableSize++;
-    }
-    else { //Update var
-        delete Table[i];
-        Table[i] = var;
-    }
+	int i = SearchIndex(var->Name);
+	if (i == -1) { //create new
+		Table[TableSize] = var;
+		TableSize++;
+	}
+	else { //Update var
+		delete Table[i];
+		Table[i] = var;
+	}
 }
-
 /*
-void TTableVars::AddScalar(char* _name, double _value) {
-    double* a = new double;
-    int* Tensor_a = new int[1]; Tensor_a[0] = 1;
-    *a = _value;
-    TVar* var_a = new TVar(_name, &a, sizeof(a));
-    var_a->Tensor = Tensor_a;	var_a->TensorSize = 1;
-    var_a->VarType = EVAR_TYPE_FLOAT;
-    var_a->Value = a;
-    Add(var_a);
+void TTableVars::AddArrray() {
+	double* a = new double;
+	int* Tensor_a = new int[1]; Tensor_a[0] = 1;
+	*a = _value;
+	TVar* var_a = new TVar(_name, &a, sizeof(a));
+	var_a->Tensor = Tensor_a;	var_a->TensorSize = 1;
+	var_a->VarType = EVAR_TYPE_FLOAT;
+	var_a->Value = a;
+	Add(var_a);
 }*/
 
 void TTableVars::AddFunc(char* _name, char* _namespace, int _paramsCount, void* _address)
 {
 	void* a = &_address;
-    int Tensor_a[] = {_paramsCount};
-    TVar* var_a = new TVar(_name, a, sizeof(a));
-	var_a->Other = (char*)CloneVar(_namespace, (int)strlen(_namespace) + 1);
-	var_a->Tensor = (int*)CloneVar(Tensor_a, sizeof(int)); var_a->TensorSize = 1;
-    var_a->VarType = EVAR_TYPE_FUNC;    
-    Add((char*)"func",var_a);
+	TVar* var_a = new TVar(_name, a, sizeof(a));
+	var_a->Other = (char*)CloneMem(_namespace, (int)strlen(_namespace) + 1);
+	var_a->TensorSize = _paramsCount;
+	var_a->VarType = EVAR_TYPE_FUNC;
+	Add(_name, var_a);
 }
 
 void TTableVars::ShowTable() const
 {
-    for (int i = 0; i < TableSize; i++) {
-        printf("%s ", Table[i]->Name);
-        if (Table[i]->VarType == EVAR_TYPE_FLOAT) {
-            printf("variable ");
-        } else {
-            printf("function ");
-        }
-        printf("Tensor [");
-        for (int j = 0; j < Table[i]->TensorSize; j++) {
-            printf("%d ", Table[i]->Tensor[j]);
-        }
-        printf("]\n");
+	for (int i = 0; i < TableSize; i++) {
 
-    }
+		if (Table[i]->VarType == EVAR_TYPE_FLOAT) {
+			printf("variable %s = ", Table[i]->Name);
+		}
+		if (Table[i]->VarType == EVAR_TYPE_FUNC) {
+			printf("function %s(%d args)", Table[i]->Name, Table[i]->TensorSize);
+		}
+		if (Table[i]->VarType == EVAR_TYPE_ARRAY) {
+			printf("array %s[%d]\n", Table[i]->Name, Table[i]->TensorSize);
+		}
+		ShowVar((TVar*)(Table[i]));
+		printf("\n");
+	}
 }
+
+void TTableVars::ShowVar(TVar* _var) const {
+	double* _d; char* _str;
+	TVar** _p;
+	if (_var->VarType == EVAR_TYPE_FLOAT) {
+		//printf("variable %s\n", var->Name);
+		_d = (double*)_var->Value;
+		printf("%.2f ", *_d);
+		return;
+	}
+	if (_var->VarType == EVAR_TYPE_FUNC) {
+		//printf("function %s()\n", var->Name);
+		return;
+	}
+	if (_var->VarType == EVAR_TYPE_STRING) {
+		_str = (char*)_var->Value;
+		if (_str) {
+			printf("%s ", _str);
+		}
+		return;
+	}
+	if (_var->VarType == EVAR_TYPE_ARRAY) {
+		_p = (TVar**)_var->Value;
+		for (int i = 0; i < _var->TensorSize; i++) {
+			ShowVar(_p[i]);
+			printf("\n");
+		}
+		return;
+	}
+
+}
+
