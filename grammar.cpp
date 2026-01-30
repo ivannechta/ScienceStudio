@@ -36,6 +36,8 @@ int TGrammar::Priority(char operation)
     switch (operation) {
     case '(':
     case ')':
+    case '[':
+    case ']':
         return 6;
     //case '^':
 //        return 5;
@@ -162,7 +164,9 @@ void TGrammar::PolizArithm(char* _expression)
             str = GetNewStr(_expression, i, j);
 			var = TableVars->Search(str);
             //if (strcmp(str, "func") == 0) { //Fix checking function by VAR/func search
-            if (var && var->VarType == EVAR_TYPE_FUNC){
+            if (var && 
+                (var->VarType == EVAR_TYPE_FUNC ||
+                 var->VarType == EVAR_TYPE_ARRAY)){
                 push(&Stack_tmp, str);
             }
             else {
@@ -182,17 +186,22 @@ void TGrammar::PolizArithm(char* _expression)
                 
                 push(&Stack_tmp, znak);
             } else {
-                if (znak[0] == '(') {
+                if ((znak[0] == '(') ||
+                    (znak[0] == '['))
+
+                {
                     push(&Stack_tmp, znak);
+                    if (znak[0] == '['){ push(&Stack, znak); }
                     i++;
                     continue;
                 }
 
-                if ((znak[0] == ')') ||
+                if ((znak[0] == ')') || (znak[0] == ']') ||
                     (znak[0] == ',')) // function delimiter
                 {
                     while ((Stack_tmp) &&
-                        (Stack_tmp->data[0]!='('))
+                        (Stack_tmp->data[0]!='(') &&
+                        (Stack_tmp->data[0] != '['))
                     {
                         stk_znak = pop(&Stack_tmp);
                         if (stk_znak) {
@@ -201,9 +210,13 @@ void TGrammar::PolizArithm(char* _expression)
                     }
                     if (znak[0] != ',') {
                         pop(&Stack_tmp); // pop '('
+                        if (znak[0] == ']') { push(&Stack, znak); }
                     }
                     var = TableVars->Search(Stack_tmp->data);
-                    if (var && var->VarType == EVAR_TYPE_FUNC) {
+                    if (var && 
+                            ((var->VarType == EVAR_TYPE_FUNC)||
+                            (var->VarType == EVAR_TYPE_ARRAY))) 
+                    {
                     //if (strcmp(Stack_tmp->data, "func") == 0) { // Fix checking function by VAR/func search
                         stk_znak = pop(&Stack_tmp); // pop function name
                         if (stk_znak) {
@@ -215,7 +228,8 @@ void TGrammar::PolizArithm(char* _expression)
                 } else {
                     while ((Stack_tmp) &&
                         (Priority(znak[0]) <= Priority(Stack_tmp->data[0])) &&
-                        (Stack_tmp->data[0] != '(')
+                        (Stack_tmp->data[0] != '(') &&
+                        (Stack_tmp->data[0] != '[')
                         )
                     {
                         stk_znak = pop(&Stack_tmp);
@@ -242,15 +256,15 @@ void TGrammar::PolizArithm(char* _expression)
 }
 void TGrammar::CalcExpr(char* _expression) {
     PolizArithm(_expression);
-    TExpressionResult res=CalcOneStep(Stack);
+    TExpressionResult res = CalcOneStep(Stack);
     if (res.Value) {
         double* d = (double*)((TVar*)(res.Value))->Value;
         printf("Result = %.2f\n", *d);
     }
-
     while (Stack) { // Clear stack for future using
          pop(&Stack);        
     }
+    printf("\n");
 }
 
 #pragma message( "TODO: Depricated ")
