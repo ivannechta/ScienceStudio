@@ -46,19 +46,17 @@ TVar* TVar::CloneTVar(char* _NewName)
 		return var;
 	}
 	if (VarType == EVAR_TYPE_ARRAY){
-		for (int i = 0; i < TensorSize; i++) {
-			var = new TVar(_NewName, Value, sizeof(void*));
-			var->VarType = VarType;
-			var->TensorSize = TensorSize;
-			var->Other = NULL;
-			var->Value = new TVar**[TensorSize];
+		var = new TVar(_NewName, NULL, 0);
+		var->VarType = VarType;
+		var->TensorSize = TensorSize;
+		var->Other = NULL;
+		var->Value = new TVar * *[TensorSize];
+		TVar** _p = (TVar**)var->Value;
+		TVar** _src = (TVar**)(Value);
 
-			TVar**_src= (TVar**)(Value);
-			TVar* el_src = _src[i];
-			TVar** _dst = (TVar**)var->Value;
-			_dst[i] = _src[i]->CloneTVar(NULL);
-		}
-		// TODO copy Arrays
+		for (int i = 0; i < TensorSize; i++) {
+			_p[i] = _src[i]->CloneTVar(NULL);
+		}		
 	}
 	return var;
 }

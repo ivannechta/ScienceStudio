@@ -9,6 +9,10 @@ struct TStack {
 	char* data;
 	struct TStack* next;
 };
+struct TVarStack {
+	TVar* data;
+	struct TVarStack* next;
+};
 struct TExpressionResult {
 	TVar* Value;
 	TStack* stk;
@@ -26,8 +30,11 @@ private:
 public:
 	//TODO: Unary minus before name
 	struct TStack* Stack, * Stack_tmp;
+	struct TVarStack* VarStack;
 	char* pop(struct TStack** _stack);
 	void push(struct TStack** _stack, char* _data);
+	TVar* pop(struct TVarStack** _stack);
+	void push(struct TVarStack** _stack, TVar* _data);
 	void ShowStack(struct TStack* _stack);
 
 	int Priority(char operation);
@@ -50,6 +57,7 @@ public:
 
 	TGrammar(TTableVars* _table, TContext* _context) {
 		Stack = Stack_tmp = NULL;
+		VarStack = NULL;
 		ExpressionResult = { 0, NULL };
 		TableVars = _table;
 		Context = _context;

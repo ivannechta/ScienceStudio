@@ -15,9 +15,29 @@ char* TGrammar::pop(TStack** _stack)
 	return NULL;
 }
 
+TVar* TGrammar::pop(struct TVarStack** _stack) {
+    struct TVarStack* tmp = *_stack;
+    TVar* data;
+    if (tmp != NULL) {
+        data = tmp->data;
+        tmp = tmp->next;
+        delete* _stack;
+        *_stack = tmp;
+        return data;
+    }
+    return NULL;
+
+}
 void TGrammar::push(TStack** _stack, char* _data)
 {
     struct TStack* New=new TStack;
+    New->next = *_stack;
+    New->data = _data;
+    *_stack = New;
+}
+
+void TGrammar::push(struct TVarStack** _stack, TVar* _data) {
+    struct TVarStack* New = new TVarStack;
     New->next = *_stack;
     New->data = _data;
     *_stack = New;
@@ -242,27 +262,25 @@ void TGrammar::PolizArithm(char* _expression)
             continue;
         }
     }
-	//    ShowStack(Stack);
+	
 	while (Stack_tmp) {
 		stk_znak = pop(&Stack_tmp);
 		if (stk_znak) {
 			push(&Stack, stk_znak);
 		}
 	}
-
-	ShowStack(Stack);
-	//return nullptr;
-    //return Stack
 }
 void TGrammar::CalcExpr(char* _expression) {
     PolizArithm(_expression);
     TExpressionResult res = CalcOneStep(Stack);
     if (res.Value) {
-        double* d = (double*)((TVar*)(res.Value))->Value;
-        printf("Result = %.2f\n", *d);
+        TableVars->ShowVar(res.Value);
     }
     while (Stack) { // Clear stack for future using
          pop(&Stack);        
+    }
+    while (Stack_tmp) { // Clear stack for future using
+        pop(&Stack_tmp);
     }
     printf("\n");
 }
@@ -342,10 +360,34 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         if (!res_a.Value) {
             return res_a;
         }
-        if (znak == '=') {            
+        if (znak == '=') {
+            //TableVars->ShowVar(res_a.Value);
             TableVars->Add(res_a.stk->data, res_a.Value);
             res.Value = res_a.Value->CloneTVar((char*)"apply=");
             res.stk = res_a.stk;
+            return res;
+        }
+        if (znak == ']') {
+            int array_len = 0;
+            stk = stk->next;
+            while(stk->data[0]!='[') {
+                res = CalcOneStep(stk);
+                push(&VarStack, res.Value);
+                //printf("%.2f ", *(double*)(TVar*)(res.Value)->Value);
+                array_len++;
+				stk = res.stk;
+            }
+            stk = stk->next; // pass '['
+            TVar* var_array = new TVar((char*)"array", NULL, 0);
+            TVar** array = new TVar * [array_len];
+            var_array->VarType = EVAR_TYPE_ARRAY;
+            var_array->TensorSize = array_len;
+            var_array->Value = (void*)array;
+            for (int i = 0; i < array_len; i++) {
+                array[i] = pop(&VarStack);
+            }
+            res.Value = var_array;
+            res.stk = stk;
             return res;
         }
         res_b = CalcOneStep(res_a.stk);

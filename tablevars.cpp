@@ -31,14 +31,7 @@ int TTableVars::SearchIndex(char* _name)
 void TTableVars::Add(char* _NewName, TVar* _var)
 {
 	TVar* var;
-	if ((_var->VarType == EVAR_TYPE_FLOAT) ||
-		(_var->VarType == EVAR_TYPE_FUNC) ||
-		(_var->VarType == EVAR_TYPE_STRING))
-	{
-		var = _var->CloneTVar(_NewName);
-	} else {
-		var = _var;
-	}
+	var = _var->CloneTVar(_NewName);
 
 	int i = SearchIndex(var->Name);
 	if (i == -1) { //create new
@@ -50,17 +43,6 @@ void TTableVars::Add(char* _NewName, TVar* _var)
 		Table[i] = var;
 	}
 }
-/*
-void TTableVars::AddArrray() {
-	double* a = new double;
-	int* Tensor_a = new int[1]; Tensor_a[0] = 1;
-	*a = _value;
-	TVar* var_a = new TVar(_name, &a, sizeof(a));
-	var_a->Tensor = Tensor_a;	var_a->TensorSize = 1;
-	var_a->VarType = EVAR_TYPE_FLOAT;
-	var_a->Value = a;
-	Add(var_a);
-}*/
 
 void TTableVars::AddFunc(char* _name, char* _namespace, int _paramsCount, void* _address)
 {
@@ -94,13 +76,11 @@ void TTableVars::ShowVar(TVar* _var) const {
 	double* _d; char* _str;
 	TVar** _p;
 	if (_var->VarType == EVAR_TYPE_FLOAT) {
-		//printf("variable %s\n", var->Name);
 		_d = (double*)_var->Value;
 		printf("%.2f ", *_d);
 		return;
 	}
 	if (_var->VarType == EVAR_TYPE_FUNC) {
-		//printf("function %s()\n", var->Name);
 		return;
 	}
 	if (_var->VarType == EVAR_TYPE_STRING) {
@@ -120,4 +100,3 @@ void TTableVars::ShowVar(TVar* _var) const {
 	}
 
 }
-

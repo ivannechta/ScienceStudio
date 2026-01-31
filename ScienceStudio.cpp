@@ -53,15 +53,18 @@ int main()
 	Core.Settings->ParceSettings();
 	
 	TGrammar g(Core.Table, Core.Context_lnk);
-	Core.Table->ShowTable();
-	Core.Table->Add((char*)"MyNewArray", CreateArray2D());
+	//Core.Table->ShowTable();
+	//Core.Table->Add((char*)"MyNewArray", CreateArray2D());
 	//g.CalcExpr((char*)"a=1+2");
 	//g.CalcExpr((char*)"b=a");
-	g.CalcExpr((char*)"a=sum(1,2)");
-	g.CalcExpr((char*)"b=1+a*5");
+	//g.CalcExpr((char*)"a=sum(1,2)");
+	//g.CalcExpr((char*)"b=1+a*5");
 	g.CalcExpr((char*)"m=[sum(5,2),3+8]");
-	g.CalcExpr((char*)"y=[[5,2],[6,sum(4,1)]]");
-	g.CalcExpr((char*)"y=MyArray2D[5,2]");	
+	//g.CalcExpr((char*)"y=[[5,2],[6,sum(4,1)]]");
+	/*g.CalcExpr((char*)"y=MyArray2D[5,2]");
+	*/
+	//g.CalcExpr((char*)"m=[5]");
+	
 	
 	Core.Table->ShowTable();
 
