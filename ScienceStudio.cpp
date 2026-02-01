@@ -59,11 +59,17 @@ int main()
 	//g.CalcExpr((char*)"b=a");
 	//g.CalcExpr((char*)"a=sum(1,2)");
 	//g.CalcExpr((char*)"b=1+a*5");
-	g.CalcExpr((char*)"m=[sum(5,2),3+8]");
+	//g.CalcExpr((char*)"m=[sum(5,2),3+8]");
 	//g.CalcExpr((char*)"y=[[5,2],[6,sum(4,1)]]");
 	/*g.CalcExpr((char*)"y=MyArray2D[5,2]");
 	*/
 	//g.CalcExpr((char*)"m=[5]");
+
+	/*g.CalcExpr((char*)"m=[1,2,3,4,5]");
+	g.CalcExpr((char*)"y=array1D(m)");*/
+
+	g.CalcExpr((char*)"m=[[1,2],[3,4],[5,6]]");
+	g.CalcExpr((char*)"y=array2D(m,3,2)");
 	
 	
 	Core.Table->ShowTable();

@@ -261,14 +261,14 @@ void TGrammar::PolizArithm(char* _expression)
             i++;
             continue;
         }
-    }
-	
+    }    
 	while (Stack_tmp) {
 		stk_znak = pop(&Stack_tmp);
 		if (stk_znak) {
 			push(&Stack, stk_znak);
 		}
 	}
+    //ShowStack(Stack);
 }
 void TGrammar::CalcExpr(char* _expression) {
     PolizArithm(_expression);
@@ -360,8 +360,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         if (!res_a.Value) {
             return res_a;
         }
-        if (znak == '=') {
-            //TableVars->ShowVar(res_a.Value);
+        if (znak == '=') {            
             TableVars->Add(res_a.stk->data, res_a.Value);
             res.Value = res_a.Value->CloneTVar((char*)"apply=");
             res.stk = res_a.stk;
@@ -384,9 +383,9 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
             var_array->TensorSize = array_len;
             var_array->Value = (void*)array;
             for (int i = 0; i < array_len; i++) {
-                array[i] = pop(&VarStack);
+                array[i] = pop(&VarStack);                
             }
-            res.Value = var_array;
+            res.Value = var_array;            
             res.stk = stk;
             return res;
         }
@@ -402,16 +401,18 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         TVar* var; double* var_tmp;
 		if (ReadName(stk->data, 0) != -1) {
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
-                if (var->VarType == EVAR_TYPE_FLOAT) {
-                    res.Value = var->CloneTVar((char*)"var");
+                if ((var->VarType == EVAR_TYPE_FLOAT) ||
+                    (var->VarType == EVAR_TYPE_ARRAY))
+                {
+                    res.Value = var->CloneTVar((char*)"var");                    
                     res.stk = stk->next;
                     return res;
-                }
+                }                
                 else {
                     // TODO
                     // create args array
                     struct TArguments* Args = (TArguments*)Context->Arguments;
-                    TVar* FuncArg;
+                    TVar* FuncArg=NULL;
                     TExpressionResult FuncRes;
                     Args->argc = var->TensorSize; // argument counts
                     Args->argv = new TVar*[Args->argc];
@@ -421,16 +422,15 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                         if (!FuncRes.Value) {
                             return FuncRes;
                         }
-                        FuncArg = FuncRes.Value->CloneTVar((char*)"funcArg");//new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));						
-                        FuncArg->TensorSize = 1;
+                        FuncArg = FuncRes.Value->CloneTVar((char*)"funcArg");//new TVar((char*)"funcArg", &FuncRes.Value, sizeof(double));						                                                
                         Args->argv[i] = FuncArg; // put calculated argument in structure for transmitt to dll
                     }
                     // call func & return result
-                    FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));
+                    FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));                    
                     TVar* FuncResult = FunctionCaller();
                     // TODO check what type was returned: double or string or array Name of Tvar contains a type
 					res.Value = FuncResult;
-                    res.stk = FuncRes.stk;
+                    res.stk = FuncRes.stk;                    
                     // delete arguments form memory after func call(free)
                     for (int i = 0; i < Args->argc; i++) {
                         delete Args->argv[i];
@@ -439,7 +439,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                     return res;
                 }
             }
-            printf("Var not found\n");
+            printf("Var '%s' was not found\n", stk->data);
             res.Value = NULL;
 		}
 		else if ((ReadFloat(stk->data, 0) != -1) ||
