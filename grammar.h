@@ -48,7 +48,7 @@ public:
 	bool isNameChar(unsigned char ch);
 	bool isDigit(char ch);
 
-	void PolizArithm(char* _expression);
+	bool PolizArithm(char* _expression);
 	void CalcExpr(char* _expression);
 	double ApplySign(double _a, char znak, double _b);
 	TVar* ApplySign(TVar* _a, char znak, TVar* _b);

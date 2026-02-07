@@ -73,7 +73,7 @@ bool TParceCmd::ParceFunctionCall(char* text, int i) {
 	printf("Recognized Alias %s\n", Alias);
 
 	TSettings_Record rec;
-	rec.Namespace = Namespace;
+
 	rec.AliasName = Alias;
 	j = Core->Settings->Search(&rec);
 	if (j != -1) {
@@ -88,8 +88,7 @@ bool TParceCmd::ParceFunctionCall(char* text, int i) {
 }
 bool TParceCmd::ParceParams(char* text, int i) //depricated
 {
-	char *str = &text[i];	
-	char* token;
+	char* str = &text[i];
 	char* context = NULL; // Context pointer for state
 	size_t max_len = sizeof(str); // For the first call
 	char delim[] = "(, )";

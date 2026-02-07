@@ -7,7 +7,6 @@ class TTableVars
 {
 private:
 	void* CloneMem(void* _addr, int _size);
-	TVar* CloneTVar();
 public:
 	TVar** Table;
 	int TableSize;
@@ -16,7 +15,7 @@ public:
 	int SearchIndex(char* _name);
 	void Add(char* _name, TVar* _var);
 	//void AddScalar(char* _name, double _value);
-	void AddFunc(char* _name, char* _namespace, int _paramsCount, void* Address);
+	void AddFunc(char* _name, int _paramsCount, void* Address);
 	void ShowTable() const;
 
 	void ShowVar(TVar* var) const;

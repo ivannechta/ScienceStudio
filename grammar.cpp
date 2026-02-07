@@ -161,7 +161,7 @@ char* TGrammar::GetNewStr(char* _expression, int _start, int _end)
     }
     return str;
 }
-void TGrammar::PolizArithm(char* _expression)
+bool TGrammar::PolizArithm(char* _expression)
 {
 	TVar* var = NULL;
 	int i = 0;
@@ -183,7 +183,14 @@ void TGrammar::PolizArithm(char* _expression)
             StartLexemma = false;
             str = GetNewStr(_expression, i, j);
 			var = TableVars->Search(str);
-            //if (strcmp(str, "func") == 0) { //Fix checking function by VAR/func search
+
+			if ((j + 1 < size) && (_expression[j + 1] == '(')) {
+                //found function in expression. It should be known
+                if (!var) {
+                    printf("function '%s' was not found\n", str);
+                    return false;
+                }
+            }
             if (var && 
                 (var->VarType == EVAR_TYPE_FUNC ||
                  var->VarType == EVAR_TYPE_ARRAY)){
@@ -269,12 +276,15 @@ void TGrammar::PolizArithm(char* _expression)
 		}
 	}
     //ShowStack(Stack);
+    return true;
 }
+
 void TGrammar::CalcExpr(char* _expression) {
-    PolizArithm(_expression);
-    TExpressionResult res = CalcOneStep(Stack);
-    if (res.Value) {
-        TableVars->ShowVar(res.Value);
+    if (PolizArithm(_expression)) {
+        TExpressionResult res = CalcOneStep(Stack);
+        if (res.Value) {
+            TableVars->ShowVar(res.Value);
+        }
     }
     while (Stack) { // Clear stack for future using
          pop(&Stack);        
@@ -398,7 +408,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         res.stk = res_b.stk;
         return res;
     } else { // it is not a sign, but a Name (var or func)
-        TVar* var; double* var_tmp;
+        TVar* var;
 		if (ReadName(stk->data, 0) != -1) {
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
                 if ((var->VarType == EVAR_TYPE_FLOAT) ||
@@ -428,6 +438,8 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
                     // call func & return result
                     FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));                    
                     TVar* FuncResult = FunctionCaller();
+                    TableVars->ShowVar(FuncResult);
+
                     // TODO check what type was returned: double or string or array Name of Tvar contains a type
 					res.Value = FuncResult;
                     res.stk = FuncRes.stk;                    
@@ -448,7 +460,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
             TVar* var;
             double* _d = new double;
             *_d = atof(stk->data);
-            var = new TVar((char*)"Num", _d, sizeof(double));            
+            var = new TVar((char*)"Num", _d, sizeof(double));
             var->TensorSize = 1;
             var->Other = NULL;
             res.Value = var;

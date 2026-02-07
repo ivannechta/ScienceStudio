@@ -7,7 +7,6 @@ const uint16_t Settings_Max_Modules=100;
 typedef TVar* (*ModuleFuncType)();
 struct TSettings_Record{
 	char* AliasName;	// Name in Studio
-	char* Namespace;
 	int ParamCount;
 	char* ModuleFileName;
 	char* FunctionName; // Name in dll file

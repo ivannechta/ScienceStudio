@@ -69,8 +69,9 @@ int main()
 	g.CalcExpr((char*)"y=array1D(m)");*/
 
 	g.CalcExpr((char*)"m=[[1,2],[3,4],[5,6]]");
-	g.CalcExpr((char*)"y=array2D(m,3,2)");
-	
+	g.CalcExpr((char*)"y=Math.array2D(m,3,2)");
+
+	//g.CalcExpr((char*)"y.e=5");
 	
 	Core.Table->ShowTable();
 

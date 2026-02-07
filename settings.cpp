@@ -11,24 +11,21 @@ void TSettings::ParceSettings()
     }
     while (!feof(f)) {
         char* Alias = new char[256];
-        char* Namespace = new char[256];
         int ParamCount;
         char* ModuleFileName = new char[256];
         char* FunctionName = new char[256];
         fscanf_s(f, "%s", Alias, 255);
-        fscanf_s(f, "%s", Namespace, 255);
         fscanf_s(f, "%d", &ParamCount);
         fscanf_s(f, "%s", ModuleFileName, 255);
         fscanf_s(f, "%s", FunctionName, 255);
 
-        TSettings_Record* rec = new TSettings_Record;
-        rec->AliasName = Alias;
-        rec->Namespace = Namespace;
-        rec->ParamCount = ParamCount;
-        rec->ModuleFileName = ModuleFileName;
-        rec->FunctionName = FunctionName;
-        LoadFunction(rec);
-    }
+		TSettings_Record* rec = new TSettings_Record;
+		rec->AliasName = Alias;
+		rec->ParamCount = ParamCount;
+		rec->ModuleFileName = ModuleFileName;
+		rec->FunctionName = FunctionName;
+		LoadFunction(rec);
+	}
     fclose(f);
 }
 
@@ -49,13 +46,12 @@ int TSettings::LoadFunction(TSettings_Record* _rec)
     }
     SettingsRecord[SettingsSize++] = _rec;
     /* Add to Table*/
-    Table->AddFunc(_rec->AliasName, _rec->Namespace, _rec->ParamCount, _func);
+    Table->AddFunc(_rec->AliasName, _rec->ParamCount, _func);
     return 0;
 }
 
 bool TSettings::CmpAlias(TSettings_Record* _a, TSettings_Record* _b) {
     if (strcmp(_a->AliasName, _b->AliasName)) return false;
-    if (strcmp(_a->Namespace, _b->Namespace)) return false;
     return true;
 }
 

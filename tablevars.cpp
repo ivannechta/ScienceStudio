@@ -44,11 +44,11 @@ void TTableVars::Add(char* _NewName, TVar* _var)
 	}
 }
 
-void TTableVars::AddFunc(char* _name, char* _namespace, int _paramsCount, void* _address)
+void TTableVars::AddFunc(char* _name, int _paramsCount, void* _address)
 {
 	void* a = &_address;
 	TVar* var_a = new TVar(_name, a, sizeof(a));
-	var_a->Other = (char*)CloneMem(_namespace, (int)strlen(_namespace) + 1);
+	var_a->Other = NULL;
 	var_a->TensorSize = _paramsCount;
 	var_a->VarType = EVAR_TYPE_FUNC;
 	Add(_name, var_a);
