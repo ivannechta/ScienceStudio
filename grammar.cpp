@@ -171,11 +171,6 @@ bool TGrammar::PolizArithm(char* _expression)
     char* str; // part of the expression with name or float
     bool StartLexemma = true; // unary minus possible, but after name just arithmetic minus appears
     while (i < size) {
-        /*printf("Stack \n");
-        ShowStack(Stack);
-        printf("\n");
-        ShowStack(Stack_tmp);
-        printf("\n-------\n");*/
         if (((j = ReadName(_expression, i)) != -1) ||   // is it Name or const?
             (StartLexemma && (j = ReadFloat(_expression, i)) != -1)||
             (!StartLexemma && (j = UReadFloat(_expression, i)) != -1))
@@ -191,13 +186,12 @@ bool TGrammar::PolizArithm(char* _expression)
                     return false;
                 }
             }
-            if (var && 
+            if (var && //name of function and array should be first: 'y [1,2] array ='
                 (var->VarType == EVAR_TYPE_FUNC ||
                  var->VarType == EVAR_TYPE_ARRAY)){
                 push(&Stack_tmp, str);
-            }
-            else {
-                push(&Stack, str);
+            } else { // it is name of a simple variable
+                push(&Stack, str); 
             }
 			i = j + 1;
             continue;
@@ -210,9 +204,9 @@ bool TGrammar::PolizArithm(char* _expression)
         {   
             StartLexemma = false;
             if (Stack_tmp == NULL) {
-                
                 push(&Stack_tmp, znak);
             } else {
+                /* braces processed in a special way */
                 if ((znak[0] == '(') ||
                     (znak[0] == '['))
 
@@ -235,11 +229,12 @@ bool TGrammar::PolizArithm(char* _expression)
                             push(&Stack, stk_znak);
                         }
                     }
-                    if (znak[0] != ',') {
+                    if (znak[0] != ',') { // we stay in function or array
                         pop(&Stack_tmp); // pop '('
                         if (znak[0] == ']') { push(&Stack, znak); }
                     }
                     var = TableVars->Search(Stack_tmp->data);
+                    // next in stack func or array? they processed in a special way
                     if (var && 
                             ((var->VarType == EVAR_TYPE_FUNC)||
                             (var->VarType == EVAR_TYPE_ARRAY))) 
@@ -253,6 +248,7 @@ bool TGrammar::PolizArithm(char* _expression)
                     i++;
                     continue;
                 } else {
+                    // we observe new znak, while in stack znak with lower priority move to poliz_Result
                     while ((Stack_tmp) &&
                         (Priority(znak[0]) <= Priority(Stack_tmp->data[0])) &&
                         (Stack_tmp->data[0] != '(') &&
@@ -269,6 +265,7 @@ bool TGrammar::PolizArithm(char* _expression)
             continue;
         }
     }    
+    // move all remains to result
 	while (Stack_tmp) {
 		stk_znak = pop(&Stack_tmp);
 		if (stk_znak) {
@@ -407,19 +404,62 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         res.Value = ApplySign(res_a.Value, znak, res_b.Value);
         res.stk = res_b.stk;
         return res;
-    } else { // it is not a sign, but a Name (var or func)
+    } else { // it is not a sign, but a Name ( var,func,array or const)
         TVar* var;
-		if (ReadName(stk->data, 0) != -1) {
+		if (ReadName(stk->data, 0) != -1) { // is it var,func,array ?
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
-                if ((var->VarType == EVAR_TYPE_FLOAT) ||
-                    (var->VarType == EVAR_TYPE_ARRAY))
+                if (var->VarType == EVAR_TYPE_FLOAT)
                 {
-                    res.Value = var->CloneTVar((char*)"var");                    
+                    res.Value = var->CloneTVar((char*)"var");
                     res.stk = stk->next;
                     return res;
-                }                
-                else {
-                    // TODO
+                } 
+                if (var->VarType == EVAR_TYPE_ARRAY)
+                {
+                    // try to find indexes of array var[i,j]
+                    TStack* _p = stk->next;
+					_p = _p->next;  // pass ']'
+                    TExpressionResult ArrayRes;
+                    ArrayRes.stk = _p;
+                    TVar* ArrayArg = NULL;
+                    struct TArguments* BlockArrayArgs = new TArguments;
+                    BlockArrayArgs->argc = 0;
+                    while (_p->data[0] != '[') { // how many indexes in array
+                        BlockArrayArgs->argc++;
+                        _p = _p->next;
+						//stk = stk->next;
+                    }
+                    BlockArrayArgs->argv = new TVar * [BlockArrayArgs->argc];
+                    for (int i = BlockArrayArgs->argc - 1; i >= 0; i--) { // reverse order of indexes
+                        ArrayRes = CalcOneStep(ArrayRes.stk); // Calc every argument
+                        if (!ArrayRes.Value) {
+                            return ArrayRes;
+                        }
+                        ArrayArg = ArrayRes.Value->CloneTVar((char*)"ArrayArg");
+                        BlockArrayArgs->argv[i] = ArrayArg;
+                    }
+                    ArrayRes.stk = ArrayRes.stk->next; //pass '['
+                    // now get Value of array[i,j,...]
+                    int index;
+					TVar* _tmp = var;
+                    TVar** _tmp0;
+                    for (int i = 0; i < BlockArrayArgs->argc; i++) {
+                        index = (int)(*((double*)(BlockArrayArgs->argv[i]->Value)));
+						if ((_tmp->TensorSize > index) && (_tmp->VarType == EVAR_TYPE_ARRAY)) {
+                            _tmp0 = (TVar**)_tmp->Value;
+                            _tmp=_tmp0[index];
+                        } else {
+                            printf("Index Out of Bounds\n");
+                        }
+                    }
+                    var = _tmp;
+                    res.Value = var->CloneTVar((char*)"var");
+                    res.stk = ArrayRes.stk;
+                    return res;
+                }
+                if (var->VarType == EVAR_TYPE_FUNC)
+                {
+                    // processing a function
                     // create args array
                     struct TArguments* Args = (TArguments*)Context->Arguments;
                     TVar* FuncArg=NULL;
@@ -454,7 +494,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
             printf("Var '%s' was not found\n", stk->data);
             res.Value = NULL;
 		}
-		else if ((ReadFloat(stk->data, 0) != -1) ||
+		else if ((ReadFloat(stk->data, 0) != -1) || // it is a const
                 (ReadFloat(stk->data, 0) != -1))
         {
             TVar* var;

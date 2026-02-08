@@ -29,7 +29,8 @@ private:
 
 public:
 	//TODO: Unary minus before name
-	struct TStack* Stack, * Stack_tmp;
+	struct TStack* Stack;							// poliz result
+	struct TStack* Stack_tmp;						// poliz stack for temporary saving
 	struct TVarStack* VarStack;
 	char* pop(struct TStack** _stack);
 	void push(struct TStack** _stack, char* _data);
