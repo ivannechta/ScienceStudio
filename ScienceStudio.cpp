@@ -12,13 +12,13 @@ TVar* CreateArray1D(double a, double b) {
 	double* d1 = new double;
 	*d1 = a;
 	TVar* A = new TVar(NULL, d1, sizeof(double));
-	A->VarType = EVAR_TYPE_FLOAT;
+	A->VarType = EVAR_TYPE_DOUBLE;
 	A->TensorSize = 1;
 
 	double* d2 = new double;
 	*d2 = b;
 	TVar* B = new TVar(NULL, d2, sizeof(double));
-	B->VarType = EVAR_TYPE_FLOAT;
+	B->VarType = EVAR_TYPE_DOUBLE;
 	B->TensorSize = 1;
 
 	TVar* C = new TVar((char*)"MyArray1D", NULL, sizeof(double));
@@ -70,7 +70,8 @@ int main()
 
 	g.CalcExpr((char*)"m=[[1,2],[3,4],[5,6]]");
 	//g.CalcExpr((char*)"y=Math.array2D(m,3,2)");
-	g.CalcExpr((char*)"y=m[1]");
+	//g.CalcExpr((char*)"y=m[1]");
+	g.CalcExpr((char*)"m[1,1]=0");
 
 	//g.CalcExpr((char*)"y.e=5");
 	

@@ -58,7 +58,7 @@ void TTableVars::ShowTable() const
 {
 	for (int i = 0; i < TableSize; i++) {
 
-		if (Table[i]->VarType == EVAR_TYPE_FLOAT) {
+		if (Table[i]->VarType == EVAR_TYPE_DOUBLE) {
 			printf("variable %s = ", Table[i]->Name);
 		}
 		if (Table[i]->VarType == EVAR_TYPE_FUNC) {
@@ -76,7 +76,7 @@ void TTableVars::ShowVar(TVar* _var) const {
 	double* _d; char* _str;
 	TVar** _p;
 	//printf("(%d;%d)",_var->VarType, _var->TensorSize);
-	if (_var->VarType == EVAR_TYPE_FLOAT) {
+	if (_var->VarType == EVAR_TYPE_DOUBLE) {
 		_d = (double*)_var->Value;
 		printf("%.2f ", *_d);
 		return;

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 enum EVAR_TYPE {
-	EVAR_TYPE_FLOAT,
+	EVAR_TYPE_DOUBLE,
 	EVAR_TYPE_FUNC,
 	EVAR_TYPE_STRING,
 	EVAR_TYPE_ARRAY,
@@ -31,7 +31,7 @@ public:
 		}
 		Value = CloneMem(_value, _ByteSize);		
 		Other = NULL;
-		//VarType = EVAR_TYPE_FLOAT;
+		//VarType = EVAR_TYPE_DOUBLE;
 	}
 
 	~TVar() {

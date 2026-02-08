@@ -311,8 +311,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
     switch (znak)
     {
     case '+':
-        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
-            (_b->VarType == EVAR_TYPE_FLOAT)) {
+        if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
+            (_b->VarType == EVAR_TYPE_DOUBLE)) {
             *d = *(double*)_a->Value + *(double*)_b->Value;
             var = new TVar((char*)"ApplySign", d, sizeof(double));            
             var->TensorSize = 1;
@@ -320,8 +320,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         else { return NULL; }
         return var;
     case '-': 
-        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
-            (_b->VarType == EVAR_TYPE_FLOAT)) {
+        if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
+            (_b->VarType == EVAR_TYPE_DOUBLE)) {
             *d = *(double*)_a->Value - *(double*)_b->Value;
             var = new TVar((char*)"ApplySign", d, sizeof(double));            
             var->TensorSize = 1;
@@ -329,8 +329,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         else { return NULL; }
         return var;        
     case '*': 
-        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
-            (_b->VarType == EVAR_TYPE_FLOAT)) {
+        if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
+            (_b->VarType == EVAR_TYPE_DOUBLE)) {
             *d = *(double*)_a->Value * *(double*)_b->Value;
             var = new TVar((char*)"ApplySign", d, sizeof(double));            
             var->TensorSize = 1;
@@ -338,8 +338,8 @@ TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
         else { return NULL; }
         return var;
     case '/': 
-        if ((_a->VarType == EVAR_TYPE_FLOAT) &&
-            (_b->VarType == EVAR_TYPE_FLOAT)) {
+        if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
+            (_b->VarType == EVAR_TYPE_DOUBLE)) {
             *d = *(double*)_a->Value / *(double*)_b->Value;
             var = new TVar((char*)"ApplySign", d, sizeof(double));            
             var->TensorSize = 1;
@@ -408,7 +408,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk )
         TVar* var;
 		if (ReadName(stk->data, 0) != -1) { // is it var,func,array ?
 			if ((var = TableVars->Search(stk->data)) != NULL) { // if it is name of var, so it should be already known (except 'var = ...' )
-                if (var->VarType == EVAR_TYPE_FLOAT)
+                if (var->VarType == EVAR_TYPE_DOUBLE)
                 {
                     res.Value = var->CloneTVar((char*)"var");
                     res.stk = stk->next;

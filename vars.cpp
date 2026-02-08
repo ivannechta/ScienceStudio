@@ -14,7 +14,7 @@ TVar* TVar::CloneTVar(char* _NewName)
 {
 	TVar* var = NULL;
 
-	if (VarType == EVAR_TYPE_FLOAT) {
+	if (VarType == EVAR_TYPE_DOUBLE) {
 		double* d = new double;
 		*d = *(double*)Value;
 		var = new TVar(_NewName, d, sizeof(double));
@@ -37,7 +37,7 @@ TVar* TVar::CloneTVar(char* _NewName)
 		var->VarType = VarType;
 		var->TensorSize = TensorSize;
 		if (Other) {
-			int _len = strlen(Other);
+			int _len = (int)strlen(Other);
 			var->Other = new char[_len + 1];
 			strcpy_s(var->Other, _len + 1, Other);
 		} else { 
