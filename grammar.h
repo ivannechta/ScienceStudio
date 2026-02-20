@@ -60,7 +60,7 @@ public:
 	void CalcOneStep_process_var_const(TStack* stk, TExpressionResult* Result); //aux for refactoring
 	void CalcOneStep_process_var_double(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
 	void CalcOneStep_process_var_func(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
-	void CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
+	void CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpressionResult* Result, TVar* assignVar); //aux for refactoring
 	void CalcOneStep_process_sign_array(TStack* stk, TExpressionResult* Result); //aux for refactoring
 
 	TExpressionResult CalcOneStep(TStack* stk);

@@ -63,12 +63,14 @@ int main()
 	//g.CalcExpr((char*)"y=[[5,2],[6,sum(4,1)]]");
 	/*g.CalcExpr((char*)"y=MyArray2D[5,2]");
 	*/
-	//g.CalcExpr((char*)"m=[5]");
+	//g.CalcExpr((char*)"y=[5]");
 
 	/*g.CalcExpr((char*)"m=[1,2,3,4,5]");
 	g.CalcExpr((char*)"y=array1D(m)");*/
 
 	g.CalcExpr((char*)"m=[[1,2],[3,4],[5,6]]");
+	g.CalcExpr((char*)"y=m[2,1]");
+	g.CalcExpr((char*)"y=7");
 	//g.CalcExpr((char*)"y=Math.array2D(m,3,2)");
 	//g.CalcExpr((char*)"y=m[1]");
 	g.CalcExpr((char*)"m[1,1]=0");

@@ -373,7 +373,7 @@ void TGrammar::CalcOneStep_process_var_double(TVar* var, TStack* stk, TExpressio
 
 void TGrammar::CalcOneStep_process_var_func(TVar* var, TStack* stk, TExpressionResult* Result)
 {
-	ModuleFuncType FunctionCaller;						
+	ModuleFuncType FunctionCaller;
 	struct TArguments* Args = (TArguments*)Context->Arguments; // create args array	
 	TExpressionResult FuncRes;
 	Args->argc = var->TensorSize; // argument counts
@@ -383,9 +383,10 @@ void TGrammar::CalcOneStep_process_var_func(TVar* var, TStack* stk, TExpressionR
 		FuncRes = CalcOneStep(FuncRes.stk); // Calc every argument
 		if (!FuncRes.Value) {
 			*Result = FuncRes;
+			return;
 		}
 		// put calculated argument in structure for transmitt to dll
-		Args->argv[i] = FuncRes.Value->CloneTVar((char*)"funcArg");		
+		Args->argv[i] = FuncRes.Value->CloneTVar((char*)"funcArg");
 	}
 	// call func & return result
 	FunctionCaller = (ModuleFuncType)(*(ModuleFuncType*)(var->Value));
@@ -402,7 +403,7 @@ void TGrammar::CalcOneStep_process_var_func(TVar* var, TStack* stk, TExpressionR
 	// TODO delete FuncResult.Value;
 }
 
-void TGrammar::CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpressionResult* Result)
+void TGrammar::CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpressionResult* Result, TVar* assignVar)
 {
 	// try to find indexes of array var[i,j]
 	TStack* _p = stk->next;
@@ -414,22 +415,23 @@ void TGrammar::CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpression
 	BlockArrayArgs->argc = 0;
 	while (_p->data[0] != '[') { // how many indexes in array?
 		BlockArrayArgs->argc++;
-		_p = _p->next;		
+		_p = _p->next;
 	}
 	BlockArrayArgs->argv = new TVar * [BlockArrayArgs->argc];
 	for (int i = BlockArrayArgs->argc - 1; i >= 0; i--) { // reverse order of indexes
 		ArrayRes = CalcOneStep(ArrayRes.stk); // Calc every index
 		if (!ArrayRes.Value) {
 			*Result = ArrayRes;
+			return;
 		}
 		ArrayArg = ArrayRes.Value->CloneTVar((char*)"ArrayArg");
 		BlockArrayArgs->argv[i] = ArrayArg;
 	}
 	ArrayRes.stk = ArrayRes.stk->next; //pass '['
 	// now we have indexes in BlockArrayArgs, so we try to get Value of array[i,j,...]
-	int index;
-	TVar* _tmp = var;
-	TVar** _tmp0;
+	int index = -1;
+	TVar* _tmp = var;	
+	TVar** _tmp0 = (TVar**)_tmp->Value; // just init for assignVar
 	for (int i = 0; i < BlockArrayArgs->argc; i++) {
 		index = (int)(*((double*)(BlockArrayArgs->argv[i]->Value)));
 		if ((_tmp->TensorSize > index) && (_tmp->VarType == EVAR_TYPE_ARRAY)) {
@@ -441,6 +443,10 @@ void TGrammar::CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpression
 		}
 	}
 	var = _tmp;
+	if (index != -1 && _tmp0 && assignVar) {
+		_tmp0[index] = assignVar;
+	}
+
 	Result->Value = var->CloneTVar((char*)"var");
 	Result->stk = ArrayRes.stk;
 }
@@ -489,7 +495,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk)
 				}
 				if (var->VarType == EVAR_TYPE_ARRAY)
 				{
-					CalcOneStep_process_var_array(var, stk, &res);
+					CalcOneStep_process_var_array(var, stk, &res, NULL);
 					return res;
 				}
 				if (var->VarType == EVAR_TYPE_FUNC)
@@ -513,9 +519,19 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk)
 			return res_a;
 		}
 		if (znak == '=') {
-			TableVars->Add(res_a.stk->data, res_a.Value);
-			res.Value = res_a.Value->CloneTVar((char*)"apply=");
-			res.stk = res_a.stk;
+			TVar* _arr = TableVars->Search(res_a.stk->data);
+			if (_arr && _arr->VarType == EVAR_TYPE_ARRAY /* && (znak == ']')*/)
+			{	// we in situation when element of array is assigned: m[1,2] = 3;
+				stk = stk->next; // pass '='
+				stk = stk->next; // pass first argument: '3'
+				CalcOneStep_process_var_array(_arr, stk, &res_b, res_a.Value);
+			}
+			else { // just assign y=5 or n=arr[2,1]
+				TableVars->Add(res_a.stk->data, res_a.Value);
+				res.Value = res_a.Value->CloneTVar((char*)"apply=");
+				res.stk = res_a.stk;
+			}
+
 			return res;
 		}
 		if (znak == ']') {

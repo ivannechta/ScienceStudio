@@ -13,8 +13,7 @@ public:
 
 	TVar* Search(char* _name);
 	int SearchIndex(char* _name);
-	void Add(char* _name, TVar* _var);
-	//void AddScalar(char* _name, double _value);
+	void Add(char* _name, TVar* _var);	
 	void AddFunc(char* _name, int _paramsCount, void* Address);
 	void ShowTable() const;
 
