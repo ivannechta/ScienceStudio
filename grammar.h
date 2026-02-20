@@ -4,6 +4,9 @@
 #include <string.h>
 #include "tablevars.h"
 #include "context.h"
+const int NOT_A_SIGN = 0;
+const int BAD_NAME = -1;
+const int BAD_FLOAT = -1;
 
 struct TStack {
 	char* data;
@@ -16,13 +19,13 @@ struct TVarStack {
 struct TExpressionResult {
 	TVar* Value;
 	TStack* stk;
+	bool error;
 };
 typedef TVar* (*ModuleFuncType)();
 
 class TGrammar
 {
-private:
-	//struct TStack* Stack, *Stack_tmp;
+private:	
 	TTableVars* TableVars;
 	struct TExpressionResult ExpressionResult;
 	TContext* Context;
@@ -38,7 +41,7 @@ public:
 	void push(struct TVarStack** _stack, TVar* _data);
 	void ShowStack(struct TStack* _stack);
 
-	int Priority(char operation);
+	int GetSignPriority(char operation);
 	int UReadInt(char* _expression, int _pos);
 	int UReadFloat(char* _expression, int _pos);
 
@@ -53,6 +56,12 @@ public:
 	void CalcExpr(char* _expression);
 	double ApplySign(double _a, char znak, double _b);
 	TVar* ApplySign(TVar* _a, char znak, TVar* _b);
+
+	void CalcOneStep_process_var_const(TStack* stk, TExpressionResult* Result); //aux for refactoring
+	void CalcOneStep_process_var_double(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
+	void CalcOneStep_process_var_func(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
+	void CalcOneStep_process_var_array(TVar* var, TStack* stk, TExpressionResult* Result); //aux for refactoring
+	void CalcOneStep_process_sign_array(TStack* stk, TExpressionResult* Result); //aux for refactoring
 
 	TExpressionResult CalcOneStep(TStack* stk);
 
