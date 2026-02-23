@@ -48,7 +48,7 @@ TVar* CreateArray2D() {
 int main()
 {
 	GrammaRules Gr;
-	char input[] = "baab";	
+	char input[] = "[bdc";
 	printf("%d\n", Gr.CheckGrammarInput(input));
 	return 0;
 	TCore Core;

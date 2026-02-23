@@ -8,6 +8,7 @@ int GrammaRules::CheckCorrectness(char* input, int _offset, int _rule_row, int _
 	int i = 0;
 	int tmp, col, row;
 	while (i < strlen(rule)) {
+		//printf("rule[i] %c\n", rule[i]);
 		if (rule[i] == '[') { //find NONTerminal			
 			NT = ReadName(rule, i + 1);
 			//printf("NT %s\n", NT);
@@ -16,14 +17,13 @@ int GrammaRules::CheckCorrectness(char* input, int _offset, int _rule_row, int _
 			if (st == NULL) { //если не хватило в стеке пути раскрытия, то берем номер 1
 				push(NT, 1);
 				st = pop();
-			}
+			}			
 			tmp = CheckCorrectness(input, _offset, row, st->rule_num);
-			if ((tmp != -1) && (tmp > i)) {
+			if ((tmp != -1) && (tmp > _offset)) {
 				_offset = tmp - 1;
-				i = strlen(NT) + 2;//pass name, '[' and ']'
+				i += strlen(NT) + 2;//pass name, '[' and ']'
 				//printf("expand to rule_i %d input offset %d\n", i, _offset);
-				//printf("pass %c\n", rule[i]);
-				i++;
+				//printf("pass %c\n", rule[i]);				
 				_offset++;
 			}
 			else {
@@ -32,7 +32,7 @@ int GrammaRules::CheckCorrectness(char* input, int _offset, int _rule_row, int _
 			continue;
 		}
 		if (rule[i] == SPEC_SYMBOL) {
-			i++; // pass '@' 
+			i++; // pass '@'
 		}
 		if (input[_offset] != rule[i]) {
 			return -1;
