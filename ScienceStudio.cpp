@@ -5,6 +5,7 @@
 #include "parcecmd.h"
 #include "grammar.h"
 #include "tablevars.h"
+#include "grammarules.h"
 
 bool isRunning = true;
 
@@ -44,9 +45,12 @@ TVar* CreateArray2D() {
 	}
 }
 
-
 int main()
-{	
+{
+	GrammaRules Gr;
+	char input[] = "baab";	
+	printf("%d\n", Gr.CheckGrammarInput(input));
+	return 0;
 	TCore Core;
 	HANDLE HandleConsoleThread = CreateThread(NULL, 0, Console_Thread, &Core, 0, NULL);
 	Sleep(100); // Wait until pipe created

@@ -92,7 +92,7 @@ int TGrammar::UReadInt(char* _expression, int _pos) {
 		return i - 1; //position of the last digit
 	}
 }
-int TGrammar::UReadFloat(char* _expression, int _pos)
+int TGrammar::UReadDouble(char* _expression, int _pos)
 {
 	if (_expression[_pos] == 0) {
 		return -1;
@@ -111,7 +111,7 @@ int TGrammar::UReadFloat(char* _expression, int _pos)
 	}
 
 }
-int TGrammar::ReadFloat(char* _expression, int _pos)
+int TGrammar::ReadDouble(char* _expression, int _pos)
 {
 	if (_expression[_pos] == 0) {
 		return -1;
@@ -121,7 +121,7 @@ int TGrammar::ReadFloat(char* _expression, int _pos)
 		i++;
 	}
 
-	i = UReadFloat(_expression, i);
+	i = UReadDouble(_expression, i);
 	return i;
 }
 bool TGrammar::isNameChar(unsigned char ch) {
@@ -171,9 +171,9 @@ bool TGrammar::PolizArithm(char* _expression)
 	char* str; // part of the expression with name or float
 	bool StartLexemma = true; // unary minus possible, but after name just arithmetic minus appears
 	while (i < size) {
-		if (((j = ReadName(_expression, i)) != -1) ||   // is it Name or const?
-			(StartLexemma && (j = ReadFloat(_expression, i)) != -1) ||
-			(!StartLexemma && (j = UReadFloat(_expression, i)) != -1))
+		if (((j = ReadName(_expression, i)) != BAD_NAME) ||   // is it Name or const?
+			(StartLexemma && (j = ReadDouble(_expression, i)) != BAD_DOUBLE) ||
+			(!StartLexemma && (j = UReadDouble(_expression, i)) != BAD_DOUBLE))
 		{
 			StartLexemma = false;
 			str = GetNewStr(_expression, i, j);
@@ -201,13 +201,12 @@ bool TGrammar::PolizArithm(char* _expression)
 		char* znak = new char[2];
 		znak[0] = _expression[i];
 		znak[1] = 0;
-		if (GetSignPriority(znak[0]) != 0) // it is a operation symbol
+		if (GetSignPriority(znak[0]) != NOT_A_SIGN) // it is an operation symbol
 		{
 			StartLexemma = false;
 			if (Stack_tmp == NULL) {
 				push(&Stack_tmp, znak);
-			}
-			else {
+			} else {
 				/* braces processed in a special way */
 				if ((znak[0] == '(') ||
 					(znak[0] == '['))
@@ -309,45 +308,34 @@ double TGrammar::ApplySign(double _a, char znak, double _b) {
 	}
 }
 TVar* TGrammar::ApplySign(TVar* _a, char znak, TVar* _b) {
-	TVar* var;// = new TVar("ApplySign", );
+	TVar* var;
 	double* d = new double;
+	if ((_a->VarType != EVAR_TYPE_DOUBLE) ||
+		(_b->VarType != EVAR_TYPE_DOUBLE)) {
+		return NULL;		
+	}
+
 	switch (znak)
 	{
-	case '+':
-		if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
-			(_b->VarType == EVAR_TYPE_DOUBLE)) {
-			*d = *(double*)_a->Value + *(double*)_b->Value;
-			var = new TVar((char*)"ApplySign", d, sizeof(double));
-			var->TensorSize = 1;
-		}
-		else { return NULL; }
+	case '+':		
+		*d = *(double*)_a->Value + *(double*)_b->Value;
+		var = new TVar((char*)"ApplySign", d, sizeof(double));
+		var->TensorSize = 1;		
 		return var;
-	case '-':
-		if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
-			(_b->VarType == EVAR_TYPE_DOUBLE)) {
-			*d = *(double*)_a->Value - *(double*)_b->Value;
-			var = new TVar((char*)"ApplySign", d, sizeof(double));
-			var->TensorSize = 1;
-		}
-		else { return NULL; }
+	case '-':		
+		*d = *(double*)_a->Value - *(double*)_b->Value;
+		var = new TVar((char*)"ApplySign", d, sizeof(double));
+		var->TensorSize = 1;
 		return var;
 	case '*':
-		if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
-			(_b->VarType == EVAR_TYPE_DOUBLE)) {
-			*d = *(double*)_a->Value * *(double*)_b->Value;
-			var = new TVar((char*)"ApplySign", d, sizeof(double));
-			var->TensorSize = 1;
-		}
-		else { return NULL; }
+		*d = *(double*)_a->Value * *(double*)_b->Value;
+		var = new TVar((char*)"ApplySign", d, sizeof(double));
+		var->TensorSize = 1;		
 		return var;
-	case '/':
-		if ((_a->VarType == EVAR_TYPE_DOUBLE) &&
-			(_b->VarType == EVAR_TYPE_DOUBLE)) {
-			*d = *(double*)_a->Value / *(double*)_b->Value;
-			var = new TVar((char*)"ApplySign", d, sizeof(double));
-			var->TensorSize = 1;
-		}
-		else { return NULL; }
+	case '/':		
+		*d = *(double*)_a->Value / *(double*)_b->Value;
+		var = new TVar((char*)"ApplySign", d, sizeof(double));
+		var->TensorSize = 1;		
 		return var;
 	default:
 		printf("Error in ApplyZnak\n");
@@ -507,7 +495,7 @@ TExpressionResult TGrammar::CalcOneStep(TStack* stk)
 			printf("Var '%s' was not found\n", stk->data);
 			res.Value = NULL;
 		}
-		else if (ReadFloat(stk->data, 0) != BAD_FLOAT) // it is a const?			
+		else if (ReadDouble(stk->data, 0) != BAD_DOUBLE) // it is a const?			
 		{
 			CalcOneStep_process_var_const(stk, &res);
 			return res;

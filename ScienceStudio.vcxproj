@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="context.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="grammarules.cpp" />
     <ClCompile Include="parcecmd.cpp" />
     <ClCompile Include="ScienceStudio.cpp" />
     <ClCompile Include="settings.cpp" />
@@ -139,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="context.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="grammarules.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="interface.h" />
     <ClInclude Include="parcecmd.h" />

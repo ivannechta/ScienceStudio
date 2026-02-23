@@ -6,7 +6,7 @@
 #include "context.h"
 const int NOT_A_SIGN = 0;
 const int BAD_NAME = -1;
-const int BAD_FLOAT = -1;
+const int BAD_DOUBLE = -1;
 
 struct TStack {
 	char* data;
@@ -43,9 +43,9 @@ public:
 
 	int GetSignPriority(char operation);
 	int UReadInt(char* _expression, int _pos);
-	int UReadFloat(char* _expression, int _pos);
+	int UReadDouble(char* _expression, int _pos);
 
-	int ReadFloat(char* _expression, int _pos);
+	int ReadDouble(char* _expression, int _pos);
 	int ReadName(char* _expression, int _pos);
 	char* GetNewStr(char* _expression, int _start, int _end); // Allocate new str and initiate it
 
