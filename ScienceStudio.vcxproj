@@ -146,6 +146,7 @@
     <ClInclude Include="parcecmd.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="grammar.h" />
+    <ClInclude Include="simple_rules.h" />
     <ClInclude Include="tablevars.h" />
     <ClInclude Include="vars.h" />
   </ItemGroup>

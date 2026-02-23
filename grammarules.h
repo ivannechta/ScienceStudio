@@ -3,19 +3,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include "simple_rules.h"
 const char SPEC_SYMBOL = '\\';
 const char DELIMITER_SYMBOL = '|';
-const int RULE_LEN = 100;
-const int RULES_TOTAL = 5;
+
 const int MAX_STACK_SIZE = 10000;
 
-static const char Rules[RULES_TOTAL][RULE_LEN] = {
-	"S->[A][B]d[C]",
-	"A->a\\[|a[A]",
-	"B->b|b[B]",
-	"C->c|c[C]",
-	""
-};
+
 struct TQueue {
 	char name[RULE_LEN];
 	int rule_num;	

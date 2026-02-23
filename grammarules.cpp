@@ -6,7 +6,7 @@ int GrammaRules::CheckCorrectness(char* input, int _offset, int _rule_row, int _
 	char* NT; //NONTerminal	
 	TQueue* st;
 	int i = 0;
-	int tmp, col, row;
+	int tmp, row;
 	while (i < strlen(rule)) {
 		//printf("rule[i] %c\n", rule[i]);
 		if (rule[i] == '[') { //find NONTerminal			
@@ -21,7 +21,7 @@ int GrammaRules::CheckCorrectness(char* input, int _offset, int _rule_row, int _
 			tmp = CheckCorrectness(input, _offset, row, st->rule_num);
 			if ((tmp != -1) && (tmp > _offset)) {
 				_offset = tmp - 1;
-				i += strlen(NT) + 2;//pass name, '[' and ']'
+				i += (strlen(NT) + 2);//pass name, '[' and ']'
 				//printf("expand to rule_i %d input offset %d\n", i, _offset);
 				//printf("pass %c\n", rule[i]);				
 				_offset++;
@@ -72,6 +72,7 @@ void GrammaRules::Show() {
 	for (int i = 0; i < stk_len; i++) {
 		printf("(%s %d) \n", Stack[i]->name, Stack[i]->rule_num);
 	}
+	printf("------\n");
 }
 
 char* GrammaRules::GetRule(int _ruleString, int _RequiredRuleNum)
@@ -151,16 +152,18 @@ int GrammaRules::GetRuleCount(int _ruleString)
 
 int GrammaRules::Search(char* _rule)
 {
+	bool flag = false;
 	uint16_t len = strlen(_rule);
 	int j;
 	for (int i = 0; i < RULES_TOTAL; i++) {
 		for (j = 0; j < len; j++) {
+			flag = false;
 			if (_rule[j] != Rules[i][j]) {
-				j = len; //break for
-				continue;
+				flag=true; //break for
+				break;
 			}
 		}
-		if (Rules[i][j] == '-') { // '->'
+		if (!flag && (Rules[i][j] == '-')) { // '->'
 			return i;
 		}
 	}
@@ -222,12 +225,12 @@ bool GrammaRules::CheckGrammarInput(char* input)
 	int strlen_input = strlen(input);
 
 	do {
+		Show();
 		stk_curr = 0;
 		len = CheckCorrectness(input, 0, 0, 1);
 		if (len == strlen_input) {
 			return true;
-		}
-		//Show();
+		}		
 	} while (NextCheckPath(stk_len));
 	return false;
 }
